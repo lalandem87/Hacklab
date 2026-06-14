@@ -15,7 +15,7 @@ class User
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, unique: true)]
+    #[ORM\Column(length: 25, unique: true)]
     private ?string $gamertag = null;
 
     #[ORM\Column(length: 255, unique: true)]
