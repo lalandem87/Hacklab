@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Categorie as Categorie;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use SebastianBergmann\Type\TrueType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
