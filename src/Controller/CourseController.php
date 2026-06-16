@@ -25,7 +25,7 @@ final class CourseController extends AbstractController
             if (empty($course)) {
                 return $this->json(["message" => "Courses not found."], Response::HTTP_BAD_REQUEST);
             }
-            return $this->json($course);
+            return $this->json($course, Response::HTTP_OK, [], ['groups' => 'course:read']);
         } catch (Exception $e) {
             return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
@@ -39,20 +39,21 @@ final class CourseController extends AbstractController
             if (!$course) {
                 return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
             }
-            return $this->json($course);
+            return $this->json($course, Response::HTTP_OK, [], ['groups' => 'course:read']);
         } catch (Exception $e) {
             return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
     }
 
     #[Route('', name: 'create_course', methods: ["POST"])]
-    function createCourse(EntityManagerInterface $em, Request $req): JsonResponse {
+    function createCourse(EntityManagerInterface $em, Request $req): JsonResponse
+    {
         try {
             $data = json_decode($req->getContent(), true);
-            if(!$data){
+            if (!$data) {
                 return $this->json(["message" => "Cannot access Data."], Response::HTTP_BAD_REQUEST);
             }
-            
+
             $course = new Course();
             $course->setName($data["name"]);
             $course->setContent($data["content"]);
@@ -68,10 +69,11 @@ final class CourseController extends AbstractController
     }
 
     #[Route('/{id}', name: 'remove_course', methods: ["DELETE"])]
-    function removeCourse(EntityManagerInterface $em, int $id): JsonResponse {
+    function removeCourse(EntityManagerInterface $em, int $id): JsonResponse
+    {
         try {
             $course = $em->getRepository(Course::class)->find($id);
-            if(!$course){
+            if (!$course) {
                 return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
             }
 

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Symfony\Component\Serializer\Attribute\Groups;
 use App\Repository\CourseImageRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -14,6 +15,7 @@ class CourseImage
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['course:read'])]
     private ?string $imageUrl = null;
 
     #[ORM\ManyToOne(inversedBy: 'courseImages')]

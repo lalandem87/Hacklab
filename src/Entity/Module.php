@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Symfony\Component\Serializer\Attribute\Groups;
+
 use App\Repository\ModuleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -19,11 +21,14 @@ class Module
     private ?string $name = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[Groups(['module:read'])]
     private ?Course $course = null;
 
+    #[Groups(['module:read'])]
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     private ?Challenge $challenge = null;
 
+    #[Groups(['module:read'])]
     #[ORM\ManyToOne(inversedBy: 'modules')]
     private ?Categorie $categorie = null;
 

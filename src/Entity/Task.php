@@ -2,36 +2,29 @@
 
 namespace App\Entity;
 
-use Symfony\Component\Serializer\Attribute\Groups;
-
-use App\Repository\ChallengeRepository;
+use App\Repository\TaskRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ChallengeRepository::class)]
-class Challenge
+#[ORM\Entity(repositoryClass: TaskRepository::class)]
+class Task
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['module:read'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 40, unique: true)]
-    #[Groups(['module:read'])]
+    #[ORM\Column(length: 20)]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['module:read'])]
     private ?string $content = null;
 
     #[ORM\Column]
-    #[Groups(['module:read'])]
-    private ?int $point = null;
+    private ?int $taskOrder = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['module:read'])]
-    private ?string $flag = null;
+    #[ORM\ManyToOne(inversedBy: 'Task')]
+    private ?Course $course = null;
 
     public function getId(): ?int
     {
@@ -62,26 +55,26 @@ class Challenge
         return $this;
     }
 
-    public function getPoint(): ?int
+    public function getTaskOrder(): ?int
     {
-        return $this->point;
+        return $this->taskOrder;
     }
 
-    public function setPoint(int $point): static
+    public function setTaskOrder(int $taskOrder): static
     {
-        $this->point = $point;
+        $this->taskOrder = $taskOrder;
 
         return $this;
     }
 
-    public function getFlag(): ?string
+    public function getCourse(): ?Course
     {
-        return $this->flag;
+        return $this->course;
     }
 
-    public function setFlag(string $flag): static
+    public function setCourse(?Course $course): static
     {
-        $this->flag = $flag;
+        $this->course = $course;
 
         return $this;
     }

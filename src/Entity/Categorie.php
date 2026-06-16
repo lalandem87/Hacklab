@@ -13,9 +13,11 @@ class Categorie
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['module:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 20, unique: true)]
+    #[Groups(['module:read'])]
     private ?string $name = null;
 
     /**
