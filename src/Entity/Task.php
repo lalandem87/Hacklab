@@ -16,19 +16,19 @@ class Task
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'module:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 20)]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'module:read'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'module:read'])]
     private ?string $content = null;
 
     #[ORM\Column]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'module:read'])]
     private ?int $taskOrder = null;
 
     #[ORM\ManyToOne(inversedBy: 'Task')]
@@ -38,7 +38,7 @@ class Task
      * @var Collection<int, taskImage>
      */
     #[ORM\OneToMany(targetEntity: taskImage::class, mappedBy: 'task')]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'module:read'])]
     private Collection $taskImages;
 
     public function __construct()

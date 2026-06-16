@@ -12,10 +12,11 @@ class CourseImage
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups('module:read')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'module:read'])]
     private ?string $imageUrl = null;
 
     #[ORM\ManyToOne(inversedBy: 'courseImages')]

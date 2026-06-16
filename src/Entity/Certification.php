@@ -27,6 +27,9 @@ class Certification
     #[ORM\OneToMany(targetEntity: UserCertification::class, mappedBy: 'certification')]
     private Collection $userCertifications;
 
+    #[ORM\OneToOne]
+    private ?Module $module = null;
+
     public function __construct()
     {
         $this->userCertifications = new ArrayCollection();
@@ -87,6 +90,18 @@ class Certification
                 $userCertification->setCertification(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getModule(): ?Module
+    {
+        return $this->module;
+    }
+
+    public function setModule(?Module $module): static
+    {
+        $this->module = $module;
 
         return $this;
     }

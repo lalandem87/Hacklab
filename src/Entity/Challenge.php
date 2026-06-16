@@ -14,7 +14,6 @@ class Challenge
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['module:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 40, unique: true)]
@@ -30,9 +29,9 @@ class Challenge
     private ?int $point = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['module:read'])]
     private ?string $flag = null;
 
+    #[Groups(['module:read'])]
     public function getId(): ?int
     {
         return $this->id;

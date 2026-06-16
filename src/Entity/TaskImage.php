@@ -13,11 +13,11 @@ class TaskImage
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'module:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'module:read'])]
     private ?string $imageUrl = null;
 
     #[ORM\ManyToOne(inversedBy: 'taskImage')]

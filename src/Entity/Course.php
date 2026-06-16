@@ -36,7 +36,7 @@ class Course
      * @var Collection<int, Task>
      */
     #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'course')]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'module:read'])]
     private Collection $task;
 
     public function __construct()
