@@ -77,6 +77,37 @@ final class TaskController extends AbstractController
         }
     }
 
+    #[Route('/{id}', name: 'edit_task', methods: ["PUT"])]
+    function editTask(EntityManagerInterface $em, int $id, Request $req): JsonResponse {
+        try {
+            $data = json_decode($req->getContent(), true);
+            if(!$data){
+                return $this->json(["message" => "Cannot access Data"], Response::HTTP_BAD_REQUEST);
+            }
+            $task = $em->getRepository(Task::class)->find($id);
+            if(!$task) {
+                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+            }
+
+            $courseId = $data["course_id"];
+            $course = $em->getRepository(Course::class)->find($courseId);
+            if(!$course){
+                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+            }
+
+            $task->setName($data["name"]);
+            $task->setContent($data["content"]);
+            $task->setTaskOrder($data["taskOrder"]);
+            $task->setCourse($course);
+
+            $em->persist($task);
+            $em->flush();
+            return $this->json(["message" => "Task " . $id . " successfuly updated."], Response::HTTP_OK);
+        } catch (Exception $e) {
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
     #[Route('/{id}', name: 'remove_task', methods: ["DELETE"])]
     function removeTask(EntityManagerInterface $em, int $id): JsonResponse
     {
