@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\CourseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
@@ -22,10 +21,6 @@ class Course
      #[Groups(['module:read'])]
     private ?string $name = null;
 
-    #[ORM\Column(type: Types::TEXT)]
-     #[Groups(['module:read'])]
-    private ?string $content = null;
-
     #[ORM\Column]
      #[Groups(['module:read'])]
     private ?int $point = null;
@@ -41,6 +36,7 @@ class Course
      * @var Collection<int, Task>
      */
     #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'course')]
+    #[Groups(['course:read'])]
     private Collection $task;
 
     public function __construct()
@@ -50,11 +46,13 @@ class Course
     }
 
 
+    #[Groups(['course:read'])]
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    #[Groups(['course:read'])]
     public function getName(): ?string
     {
         return $this->name;
@@ -63,18 +61,6 @@ class Course
     public function setName(string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getContent(): ?string
-    {
-        return $this->content;
-    }
-
-    public function setContent(string $content): static
-    {
-        $this->content = $content;
 
         return $this;
     }
@@ -94,6 +80,7 @@ class Course
     /**
      * @return Collection<int, CourseImage>
      */
+    
     public function getCourseImages(): Collection
     {
         return $this->courseImages;
