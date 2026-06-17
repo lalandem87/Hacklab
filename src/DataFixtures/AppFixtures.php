@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Categorie;
+use App\Entity\Certification;
 use App\Entity\Challenge;
 use App\Entity\Course;
 use App\Entity\Module;
@@ -28,7 +29,7 @@ class AppFixtures extends Fixture
         ];
 
         $categories = [];
-        foreach($categoriesData as $categorieData){
+        foreach ($categoriesData as $categorieData) {
             $categorie = new Categorie();
             $categorie->setName($categorieData["name"]);
             $manager->persist($categorie);
@@ -125,14 +126,39 @@ class AppFixtures extends Fixture
         ];
 
         $modules = [];
-        foreach($modulesData as $moduleData){
+        foreach ($modulesData as $moduleData) {
             $module = new Module();
             $module->setName($moduleData["name"]);
             $module->setCourse($courses[$moduleData["courseIndex"]]);
             $module->setChallenge($challenges[$moduleData['challengeIndex']]);
-            $module->setCategorie($categories[$moduleData["categorieIndex"]]); 
+            $module->setCategorie($categories[$moduleData["categorieIndex"]]);
             $manager->persist($module);
             $modules[] = $module;
+        }
+
+        $certificationsData = [
+            [
+                "name" => "Pentester",
+                "image" => "/images/certifications/pentester.png",
+                "moduleIndex" => null
+            ],
+            [
+                "name" => "Defender",
+                "image" => "/images/certifications/defender.png",
+                "moduleIndex" => null
+            ],
+        ];
+
+        $certifications = [];
+        foreach($certificationsData as $certificationData){
+            $certification = new Certification();
+            $certification->setName($certificationData["name"]);
+            $certification->setImage($certificationData["image"]);
+            if($certificationData["moduleIndex"] !== null){
+                $certification->setModule($modules[$certificationData["moduleIndex"]]);
+            }
+            $manager->persist($certification);
+            $certifications[] = $certification;
         }
 
         $manager->flush();
