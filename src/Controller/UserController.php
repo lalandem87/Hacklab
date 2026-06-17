@@ -22,20 +22,21 @@ final class UserController extends AbstractController
             if (empty($users)) {
                 return $this->json(['message' => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
             }
-            return $this->json($users);
+            return $this->json($users, 200, [], ['groups' => 'user:read']);
         } catch (Exception $e) {
             return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
     }
 
     #[Route('/me', name: 'get_me', methods: ["GET"])]
-    function getUserByToken(Security $sec): JsonResponse {
+    function getUserByToken(Security $sec): JsonResponse
+    {
         try {
             $user = $sec->getUser();
-            if(!$user){
+            if (!$user) {
                 return $this->json(["message" => "Not Authenticated"], Response::HTTP_UNAUTHORIZED);
             }
-            return $this->json($user);
+            return $this->json($user, 200, [], ['groups' => 'user:read']);
         } catch (Exception $e) {
             return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
@@ -50,7 +51,7 @@ final class UserController extends AbstractController
                 return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
             }
 
-            return $this->json($user);
+            return $this->json($user, 200, [], ['groups' => 'user:read']);
         } catch (Exception $e) {
             return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
@@ -58,10 +59,11 @@ final class UserController extends AbstractController
 
 
     #[Route('/{id}', name: 'remove_user', methods: ["DELETE"])]
-    function removeUser(EntityManagerInterface $em, int $id): JsonResponse {
+    function removeUser(EntityManagerInterface $em, int $id): JsonResponse
+    {
         try {
             $user = $em->getRepository(User::class)->find($id);
-            if(!$user){
+            if (!$user) {
                 return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
             }
 

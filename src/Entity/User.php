@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -16,33 +17,45 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+   
+    #[Groups(['course:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 25, unique: true)]
+   
+    #[Groups(['course:read', 'user:read'])]
     private ?string $gamertag = null;
 
     #[ORM\Column(length: 255, unique: true)]
+   
+    #[Groups(['course:read', 'user:read'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
     #[ORM\Column]
+   
+    #[Groups(['course:read', 'user:read'])]
     private ?int $pointEarn = null;
 
     #[ORM\Column]
+   
+    #[Groups(['course:read', 'user:read'])]
     private array $roles = [];
 
     /**
      * @var Collection<int, UserModule>
      */
     #[ORM\OneToMany(targetEntity: UserModule::class, mappedBy: 'usr')]
+    #[Groups(['course:read', 'user:read'])]
     private Collection $userModules;
 
     /**
      * @var Collection<int, UserCertification>
      */
     #[ORM\OneToMany(targetEntity: UserCertification::class, mappedBy: 'usr')]
+    #[Groups(['course:read', 'user:read'])]
     private Collection $userCertifications;
 
     public function __construct()

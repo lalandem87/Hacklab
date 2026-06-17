@@ -88,15 +88,16 @@ final class CourseController extends AbstractController
     }
 
     #[Route('/{id}/image', name: 'set_course_image', methods: ["POST"])]
-    function setCourseImage(EntityManagerInterface $em , int $id, Request $req): JsonResponse {
+    function setCourseImage(EntityManagerInterface $em, int $id, Request $req): JsonResponse
+    {
         try {
             $course = $em->getRepository(Course::class)->find($id);
-            if(!$course){
+            if (!$course) {
                 return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
             }
 
             $data = json_decode($req->getContent(), true);
-            if(!$data){
+            if (!$data) {
                 return $this->json(["message" => "Cannot access Data."], Response::HTTP_BAD_REQUEST);
             }
 
@@ -113,11 +114,12 @@ final class CourseController extends AbstractController
         }
     }
 
-     #[Route('/image/{id}', name: 'del_course_image', methods: ["DELETE"])]
-     function removeCourseImage(EntityManagerInterface $em, int $id): JsonResponse {
+    #[Route('/image/{id}', name: 'del_course_image', methods: ["DELETE"])]
+    function removeCourseImage(EntityManagerInterface $em, int $id): JsonResponse
+    {
         try {
             $courseImage = $em->getRepository(CourseImage::class)->find($id);
-            if(!$courseImage) {
+            if (!$courseImage) {
                 return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
             }
 
@@ -127,5 +129,5 @@ final class CourseController extends AbstractController
         } catch (Exception $e) {
             return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
-     }
+    }
 }

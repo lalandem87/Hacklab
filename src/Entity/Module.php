@@ -15,22 +15,22 @@ class Module
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['module:read'])]
+    #[Groups(['module:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 60, unique: true)]
-    #[Groups(['module:read'])]
+    #[Groups(['module:read', 'user:read'])]
     private ?string $name = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[Groups(['module:read'])]
+    #[Groups(['module:read', 'user:read'])]
     private ?Course $course = null;
 
-    #[Groups(['module:read'])]
+    #[Groups(['module:read', 'user:read'])]
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     private ?Challenge $challenge = null;
 
-    #[Groups(['module:read'])]
+    #[Groups(['module:read', 'user:read'])]
     #[ORM\ManyToOne(inversedBy: 'modules')]
     private ?Categorie $categorie = null;
 

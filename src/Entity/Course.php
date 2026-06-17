@@ -14,15 +14,15 @@ class Course
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-     #[Groups(['module:read'])]
+    #[Groups(['module:read', 'course:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 40, unique: true)]
-     #[Groups(['module:read'])]
+    #[Groups(['module:read', 'course:read', 'user:read'])]
     private ?string $name = null;
 
     #[ORM\Column]
-     #[Groups(['module:read'])]
+    #[Groups(['module:read', 'course:read', 'user:read'])]
     private ?int $point = null;
 
     /**
@@ -46,13 +46,12 @@ class Course
     }
 
 
-    #[Groups(['course:read'])]
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    #[Groups(['course:read'])]
+
     public function getName(): ?string
     {
         return $this->name;
@@ -80,7 +79,7 @@ class Course
     /**
      * @return Collection<int, CourseImage>
      */
-    
+
     public function getCourseImages(): Collection
     {
         return $this->courseImages;

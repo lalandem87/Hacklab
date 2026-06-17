@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UserCertificationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserCertificationRepository::class)]
 class UserCertification
@@ -11,9 +12,11 @@ class UserCertification
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['course:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'userCertifications')]
+    #[Groups(['course:read', 'user:read'])]
     private ?Certification $certification = null;
 
     #[ORM\ManyToOne(inversedBy: 'userCertifications')]

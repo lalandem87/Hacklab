@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UserModuleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserModuleRepository::class)]
 class UserModule
@@ -11,18 +12,22 @@ class UserModule
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['course:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'userModules')]
+    #[Groups(['course:read', 'user:read'])]
     private ?Module $module = null;
 
     #[ORM\ManyToOne(inversedBy: 'userModules')]
     private ?User $usr = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['course:read', 'user:read'])]
     private ?string $submittedFlag = null;
 
     #[ORM\Column]
+    #[Groups(['course:read', 'user:read'])]
     private ?bool $solved = false;
 
     public function getId(): ?int

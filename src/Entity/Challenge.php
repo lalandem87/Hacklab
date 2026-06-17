@@ -14,24 +14,25 @@ class Challenge
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['module:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 40, unique: true)]
-    #[Groups(['module:read'])]
+    #[Groups(['module:read', 'user:read'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['module:read'])]
+    #[Groups(['module:read', 'user:read'])]
     private ?string $content = null;
 
     #[ORM\Column]
-    #[Groups(['module:read'])]
+    #[Groups(['module:read', 'user:read'])]
     private ?int $point = null;
 
     #[ORM\Column(length: 255)]
     private ?string $flag = null;
 
-    #[Groups(['module:read'])]
+    #[Groups(['module:read', 'user:read'])]
     public function getId(): ?int
     {
         return $this->id;
