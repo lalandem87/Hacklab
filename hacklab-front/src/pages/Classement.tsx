@@ -1,7 +1,7 @@
 import type { JSX } from "react/jsx-runtime";
 
-export function App(): JSX.Element{
-  return (
+export function Leaderboard(): JSX.Element{
+    return (
     <>
     </>
   );
