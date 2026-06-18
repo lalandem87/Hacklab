@@ -15,7 +15,7 @@ export function Footer(): JSX.Element {
         <NavLink to="/">Contact</NavLink>
         <NavLink to="/">Discord</NavLink>
       </div>
-      <p>@ {new Date().getFullYear()} CyberLearn. Tous droits réservés.</p>
+      <p>@ {new Date().getFullYear()} Hacklab. Tous droits réservés.</p>
     </footer>
   );
 }

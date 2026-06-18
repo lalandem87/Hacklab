@@ -1,0 +1,70 @@
+.register {
+  display: flex;
+  max-width: 515px;
+  margin: 0 auto;
+  padding: 64px 32px;
+
+  &-top {
+    h1 {
+      font-size: var(--font-size-xxl);
+    }
+  }
+
+  &-container {
+    flex: 1;
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      border: 1px solid var(--border);
+      background-color: var(--background-secondary);
+      padding: 32px;
+      margin-top: 32px;
+      border-radius: var(--radius-md);
+
+      .row {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+
+        label {
+          letter-spacing: 1.2px;
+          font-size: var(--font-size-sm);
+          font-weight: 600;
+          color: #5a7a8a;
+          text-transform: uppercase;
+        }
+
+        input {
+          border: 1px solid var(--border);
+          background-color: #111820;
+          padding: 12px 16px;
+          border-radius: var(--radius-sm);
+        }
+      }
+
+      button {
+        font-weight: bold;
+        background-color: var(--primary);
+        padding: 12px 6px;
+        border: 0;
+        border-radius: var(--radius-sm);
+
+        &:hover {
+          cursor: pointer;
+          color: var(--text);
+        }
+      }
+    }
+
+    .alrd-accnt {
+      text-align: center;
+      margin-top: 30px;
+
+      a {
+        color: var(--primary);
+      }
+    }
+  }
+}
