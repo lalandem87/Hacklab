@@ -1,0 +1,25 @@
+.barre-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 208px;
+  border: 1px solid var(--border);
+  background-color: var(--background-secondary);
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    text-align: center;
+
+    &-value {
+      font-size: var(--font-size-xl);
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    &-label {
+      color: #5a7a8a;
+    }
+  }
+}
