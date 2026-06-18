@@ -1,0 +1,26 @@
+.categories {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: 48px 144px;
+  background-color: var(--background-secondary);
+
+  &-top {
+  }
+
+  &-container {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+
+    &-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      border: 1px solid var(--border);
+      padding: 12px 20px;
+      background-color: #1a2330;
+      border-radius: var(--radius-md);
+    }
+  }
+}

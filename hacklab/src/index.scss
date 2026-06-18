@@ -38,3 +38,14 @@ body {
   color: var(--text);
   font-family: var(--font-family);
 }
+
+.badge-section {
+  letter-spacing: 1.2px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 5px;
+}
+
+h2 {
+  font-size: var(--font-size-xl);
+}
