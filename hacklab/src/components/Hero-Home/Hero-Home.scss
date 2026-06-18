@@ -56,6 +56,10 @@
         padding: 12px 24px;
         border-radius: var(--radius-sm);
         color: #0a0e12;
+
+        &:hover {
+          color: var(--text);
+        }
       }
 
       .voir-modules {
