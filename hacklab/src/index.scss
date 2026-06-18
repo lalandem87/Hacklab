@@ -1,6 +1,6 @@
 :root {
   // Colors
-  --primary: #00ff88;
+  --primary: #00ff88ae;
   --background: #0a0e12;
   --background-secondary: #0f1820;
   --text: #e2e8f0;
@@ -52,4 +52,10 @@ h2 {
 
 a {
   text-decoration: none;
+}
+
+.desc-section {
+  max-width: 525px;
+  margin: 0 auto;
+  color: #5a7a8a;
 }

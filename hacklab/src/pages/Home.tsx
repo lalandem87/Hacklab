@@ -2,6 +2,7 @@ import { HeroHome } from "../components/Hero-Home/Hero-Home";
 import { BarreInfo } from "../components/Barre-Info/Barre-Info";
 import { Categories } from "../components/Categories/Categorie";
 import { CatalogueModule } from "../components/CatalogueModule/CatalogueModule";
+import { EnterMatrice } from "../components/EnterMatrice/EnterMatrice";
 
 export function Home() {
   return (
@@ -10,6 +11,7 @@ export function Home() {
       <BarreInfo />
       <Categories />
       <CatalogueModule />
+      <EnterMatrice />
     </>
   );
 }

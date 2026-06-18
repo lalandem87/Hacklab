@@ -12,7 +12,7 @@ export function HeroHome(): JSX.Element {
         <h1>
           Apprends la cybersécurité. <em>Reléve les défis.</em>
         </h1>
-        <p>
+        <p className="desc-section">
           Des modules complets alliant cours théoriques et challenges pratiques
           pour progresser de débutant à expert en sécurité informatique.
         </p>
