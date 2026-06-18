@@ -119,16 +119,20 @@ class AppFixtures extends Fixture
         $modulesData = [
             [
                 "name" => "XSS - Introduction",
+                "description" => "Apprends les bases des attaques XSS (Cross-Site Scripting) et comment les exploiter.",
+                "difficulty" => "Facile",
                 "courseIndex" => 0,
                 "challengeIndex" => 0,
                 "categorieIndex" => 0
-            ],
+            ]
         ];
 
         $modules = [];
         foreach ($modulesData as $moduleData) {
             $module = new Module();
             $module->setName($moduleData["name"]);
+            $module->setDescription($moduleData["description"]);
+            $module->setDifficulty($moduleData["difficulty"]);
             $module->setCourse($courses[$moduleData["courseIndex"]]);
             $module->setChallenge($challenges[$moduleData['challengeIndex']]);
             $module->setCategorie($categories[$moduleData["categorieIndex"]]);
@@ -150,11 +154,11 @@ class AppFixtures extends Fixture
         ];
 
         $certifications = [];
-        foreach($certificationsData as $certificationData){
+        foreach ($certificationsData as $certificationData) {
             $certification = new Certification();
             $certification->setName($certificationData["name"]);
             $certification->setImage($certificationData["image"]);
-            if($certificationData["moduleIndex"] !== null){
+            if ($certificationData["moduleIndex"] !== null) {
                 $certification->setModule($modules[$certificationData["moduleIndex"]]);
             }
             $manager->persist($certification);

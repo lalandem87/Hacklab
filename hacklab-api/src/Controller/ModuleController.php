@@ -72,6 +72,8 @@ final class ModuleController extends AbstractController
             $module->setCourse($course);
             $module->setChallenge($challenge);
             $module->setCategorie($categorie);
+            $module->setDescription($data["description"]);
+            $module->setDifficulty($data["difficulty"]);
 
             $em->persist($module);
             $em->flush();

@@ -40,6 +40,14 @@ class Module
     #[ORM\OneToMany(targetEntity: UserModule::class, mappedBy: 'module')]
     private Collection $userModules;
 
+    #[ORM\Column(length: 20)]
+    #[Groups(['module:read', 'user:read'])]
+    private ?string $difficulty = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['module:read', 'user:read'])]
+    private ?string $description = null;
+
     public function __construct()
     {
         $this->userModules = new ArrayCollection();
@@ -125,6 +133,30 @@ class Module
                 $userModule->setModule(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDifficulty(): ?string
+    {
+        return $this->difficulty;
+    }
+
+    public function setDifficulty(string $difficulty): static
+    {
+        $this->difficulty = $difficulty;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }
