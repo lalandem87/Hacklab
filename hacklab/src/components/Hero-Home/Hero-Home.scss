@@ -1,0 +1,76 @@
+.hero-home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 96px 0;
+
+  &-top {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    gap: var(--spacing-lg);
+
+    .section-badge {
+      width: fit-content;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border: 1px solid var(--primary);
+      border-radius: 999px;
+      color: var(--primary);
+      font-size: var(--font-size-sm);
+      background: rgba(0, 255, 136, 0.05);
+
+      &::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+    }
+
+    h1 {
+      font-size: var(--font-size-xxl);
+
+      em {
+        color: var(--primary);
+      }
+    }
+
+    p {
+      max-width: 525px;
+      margin: 0 auto;
+      color: #5a7a8a;
+    }
+
+    .buttons-hero {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--spacing-lg);
+
+      .btn-start {
+        text-decoration: none;
+        font-weight: 600;
+        background-color: var(--primary);
+        padding: 12px 24px;
+        border-radius: var(--radius-sm);
+        color: #0a0e12;
+      }
+
+      .voir-modules {
+        text-decoration: none;
+        border: 1px solid var(--border);
+        padding: 12px 24px;
+        color: #5a7a8a;
+        border-radius: var(--radius-sm);
+      }
+    }
+  }
+}

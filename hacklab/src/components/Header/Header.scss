@@ -30,6 +30,10 @@ header {
       &:hover {
         color: var(--text);
       }
+
+      &.active {
+        color: var(--text);
+      }
     }
   }
 
@@ -49,11 +53,11 @@ header {
     }
 
     .btn-start {
-      font-weight: bold;
+      font-weight: 600;
       background-color: var(--primary);
       padding: 8px 16px;
       border-radius: var(--radius-sm);
-      color: var(--background);
+      color: #0a0e12;
     }
   }
 }

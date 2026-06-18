@@ -11,6 +11,7 @@ export function Header(): JSX.Element {
           <span className="logo-text">Hacklab</span>
         </div>
         <nav>
+          <NavLink to="/">Home</NavLink>
           <NavLink to="/module">Modules</NavLink>
           <NavLink to="/classement">Classement</NavLink>
           <NavLink to="/certification">Certifications</NavLink>
