@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router";
 import { Home } from "./pages/Home";
 import type { JSX } from "react/jsx-runtime";
 import { Classement } from "./pages/Classement";
-import { Module } from "./pages/Module";
+import { Module } from "./pages/Module/Module";
 import { Certification } from "./pages/Certification";
 import { Communaute } from "./pages/Communaute";
 

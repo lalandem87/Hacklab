@@ -1,6 +1,6 @@
 import type { JSX } from "react/jsx-runtime";
 import { useFetch } from "../../utilities/useFetch";
-import { useState } from "react";
+import "./SideBar.scss";
 
 interface SideBarProps {
   onCatChange: (cat: string) => void;
