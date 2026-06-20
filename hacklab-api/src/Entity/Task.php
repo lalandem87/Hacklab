@@ -41,9 +41,17 @@ class Task
     #[Groups(['course:read', 'module:read'])]
     private Collection $taskImages;
 
+    /**
+     * @var Collection<int, TaskQuestion>
+     */
+    #[ORM\OneToMany(targetEntity: TaskQuestion::class, mappedBy: 'task')]
+    #[Groups(['course:read', 'module:read'])]
+    private Collection $taskQuestions;
+
     public function __construct()
     {
         $this->taskImages = new ArrayCollection();
+        $this->taskQuestions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -123,6 +131,36 @@ class Task
             // set the owning side to null (unless already changed)
             if ($taskImage->getTask() === $this) {
                 $taskImage->setTask(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TaskQuestion>
+     */
+    public function getTaskQuestions(): Collection
+    {
+        return $this->taskQuestions;
+    }
+
+    public function addTaskQuestion(TaskQuestion $taskQuestion): static
+    {
+        if (!$this->taskQuestions->contains($taskQuestion)) {
+            $this->taskQuestions->add($taskQuestion);
+            $taskQuestion->setTask($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTaskQuestion(TaskQuestion $taskQuestion): static
+    {
+        if ($this->taskQuestions->removeElement($taskQuestion)) {
+            // set the owning side to null (unless already changed)
+            if ($taskQuestion->getTask() === $this) {
+                $taskQuestion->setTask(null);
             }
         }
 

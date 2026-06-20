@@ -26,7 +26,7 @@ export function HeroHome(): JSX.Element {
         </div>
       </div>
       <div className="hero-home-bottom">
-        <img src="../../../public/images/hero-home.png" alt="image hero home" />
+        <img src="/images/hero-home.png" alt="image hero home" />
       </div>
     </section>
   );

@@ -36,7 +36,7 @@ final class ModuleController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'get_module', methods: ["GET"])]
+    #[Route('/{id}', name: 'get_module', methods: ["GET"], requirements: ['id' => '\d+'])]
     function getModuleById(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -83,7 +83,7 @@ final class ModuleController extends AbstractController
         }
     }
 
-    #[Route('/{id}/submit', name: 'submit_module', methods: ["POST"])]
+    #[Route('/{id}/submit', name: 'submit_module', methods: ["POST"], requirements: ['id' => '\d+'])]
     function SubmitModule(EntityManagerInterface $em, int $id, Security $sec, Request $req): JsonResponse
     {
         try {
@@ -131,7 +131,7 @@ final class ModuleController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'remove_module', methods: ["DELETE"])]
+    #[Route('/{id}', name: 'remove_module', methods: ["DELETE"] , requirements: ['id' => '\d+'])]
     function removeModule(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {

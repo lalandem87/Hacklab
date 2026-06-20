@@ -33,7 +33,7 @@ final class CourseController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'get_course', methods: ["GET"])]
+    #[Route('/{id}', name: 'get_course', methods: ["GET"], requirements: ['id' => '\d+'])]
     function getCourseById(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -69,7 +69,7 @@ final class CourseController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'remove_course', methods: ["DELETE"])]
+    #[Route('/{id}', name: 'remove_course', methods: ["DELETE"], requirements: ['id' => '\d+'])]
     function removeCourse(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -87,7 +87,7 @@ final class CourseController extends AbstractController
         }
     }
 
-    #[Route('/{id}/image', name: 'set_course_image', methods: ["POST"])]
+    #[Route('/{id}/image', name: 'set_course_image', methods: ["POST"], requirements: ['id' => '\d+'])]
     function setCourseImage(EntityManagerInterface $em, int $id, Request $req): JsonResponse
     {
         try {
@@ -114,7 +114,7 @@ final class CourseController extends AbstractController
         }
     }
 
-    #[Route('/image/{id}', name: 'del_course_image', methods: ["DELETE"])]
+    #[Route('/image/{id}', name: 'del_course_image', methods: ["DELETE"], requirements: ['id' => '\d+'])]
     function removeCourseImage(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {

@@ -29,7 +29,7 @@ final class CertificationController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: "certification_id", methods: ["GET"])]
+    #[Route('/{id}', name: "certification_id", methods: ["GET"], requirements: ['id' => '\d+'])]
     function getCertificationById(int $id, EntityManagerInterface $em): JsonResponse {
         try {
             $certification = $em->getRepository(Certification::class)->find($id);
@@ -63,7 +63,7 @@ final class CertificationController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: "remove_certification", methods: ["DELETE"])]
+    #[Route('/{id}', name: "remove_certification", methods: ["DELETE"], requirements: ['id' => '\d+'])]
     function removeCertification(EntityManagerInterface $em, int $id): JsonResponse {
         try {
             $certification = $em->getRepository(Certification::class)->find($id);

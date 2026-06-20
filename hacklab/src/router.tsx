@@ -8,6 +8,7 @@ import { Communaute } from "./pages/Communaute";
 
 import { Register } from "./pages/Register";
 import { Login } from "./pages/Login";
+import { ModuleId } from "./pages/ModuleId";
 
 export function Router(): JSX.Element {
   return (
@@ -15,6 +16,7 @@ export function Router(): JSX.Element {
       <Routes>
         <Route path="/" element={<Home />}></Route>
         <Route path="/module" element={<Module />}></Route>
+        <Route path="/module/:id" element={<ModuleId />}></Route>
         <Route path="/classement" element={<Classement />}></Route>
         <Route path="/certification" element={<Certification />}></Route>
         <Route path="/communaute" element={<Communaute />}></Route>

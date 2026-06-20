@@ -29,7 +29,7 @@ final class ChallengeController extends AbstractController
     }
 
 
-    #[Route('/{id}', name: 'get_challenge', methods: ["GET"])]
+    #[Route('/{id}', name: 'get_challenge', methods: ["GET"], requirements: ['id' => '\d+'])]
     function getChallengeById(int $id, EntityManagerInterface $em): JsonResponse {
         try {
             $challenge = $em->getRepository(Challenge::class)->find($id);
@@ -65,7 +65,7 @@ final class ChallengeController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'remove_challenge', methods: ["DELETE"])]
+    #[Route('/{id}', name: 'remove_challenge', methods: ["DELETE"], requirements: ['id' => '\d+'])]
     function removeChallenge(EntityManagerInterface $em, int $id): JsonResponse {
         try {
             $challenge = $em->getRepository(Challenge::class)->find($id);

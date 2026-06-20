@@ -42,7 +42,7 @@ final class UserController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'get_user', methods: ["GET"])]
+    #[Route('/{id}', name: 'get_user', methods: ["GET"], requirements: ['id' => '\d+'])]
     function getUserById(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -58,7 +58,7 @@ final class UserController extends AbstractController
     }
 
 
-    #[Route('/{id}', name: 'remove_user', methods: ["DELETE"])]
+    #[Route('/{id}', name: 'remove_user', methods: ["DELETE"], requirements: ['id' => '\d+'])]
     function removeUser(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {

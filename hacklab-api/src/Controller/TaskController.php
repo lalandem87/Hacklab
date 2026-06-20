@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Task as Task;
 use App\Entity\Course as Course;
 use App\Entity\TaskImage as TaskImage;
-
+use App\Entity\TaskQuestion;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,7 +32,7 @@ final class TaskController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'get_task', methods: ["GET"])]
+    #[Route('/{id}', name: 'get_task', methods: ["GET"], requirements: ['id' => '\d+'])]
     function getTaskById(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -60,9 +60,21 @@ final class TaskController extends AbstractController
             $task->setContent($data["content"]);
             $task->setTaskOrder($data["taskOrder"]);
             $courseId = $data["course_id"];
+            $taskQuestionId = $data["taskQuestion_id"];
+
+            if (!$taskQuestionId) {
+                return $this->json(["message" => "Task question not found"], Response::HTTP_NOT_FOUND);
+            }
+
+            $taskQuestion = $em->getRepository(TaskQuestion::class)->find($taskQuestionId);
+            if (!$taskQuestion) {
+                return $this->json(["message" => "Task question not found in database"], Response::HTTP_NOT_FOUND);
+            }
+            $task->addTaskQuestion($taskQuestion);
+
 
             if (!$courseId) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_NOT_FOUND);
             }
 
             $course = $em->getRepository(Course::class)->find($courseId);
@@ -77,21 +89,22 @@ final class TaskController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'edit_task', methods: ["PUT"])]
-    function editTask(EntityManagerInterface $em, int $id, Request $req): JsonResponse {
+    #[Route('/{id}', name: 'edit_task', methods: ["PUT"], requirements: ['id' => '\d+'])]
+    function editTask(EntityManagerInterface $em, int $id, Request $req): JsonResponse
+    {
         try {
             $data = json_decode($req->getContent(), true);
-            if(!$data){
+            if (!$data) {
                 return $this->json(["message" => "Cannot access Data"], Response::HTTP_BAD_REQUEST);
             }
             $task = $em->getRepository(Task::class)->find($id);
-            if(!$task) {
+            if (!$task) {
                 return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
             }
 
             $courseId = $data["course_id"];
             $course = $em->getRepository(Course::class)->find($courseId);
-            if(!$course){
+            if (!$course) {
                 return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
             }
 
@@ -108,7 +121,7 @@ final class TaskController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'remove_task', methods: ["DELETE"])]
+    #[Route('/{id}', name: 'remove_task', methods: ["DELETE"], requirements: ['id' => '\d+'])]
     function removeTask(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -125,7 +138,7 @@ final class TaskController extends AbstractController
         }
     }
 
-    #[Route('/{id}/image', name: 'set_task_image', methods: ["POST"])]
+    #[Route('/{id}/image', name: 'set_task_image', methods: ["POST"], requirements: ['id' => '\d+'])]
     function setTaskImage(EntityManagerInterface $em, int $id, Request $req): JsonResponse
     {
         try {
@@ -150,7 +163,7 @@ final class TaskController extends AbstractController
         }
     }
 
-    #[Route('/image/{id}', name: 'remove_task_image', methods: ["DELETE"])]
+    #[Route('/image/{id}', name: 'remove_task_image', methods: ["DELETE"], requirements: ['id' => '\d+'])]
     function removeCourseImage(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -166,4 +179,109 @@ final class TaskController extends AbstractController
             return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
     }
+
+    #[Route('/questions', name: 'all_question', methods: ["GET"])]
+    function getTaskQuestion(EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $taskQuestion = $em->getRepository(TaskQuestion::class)->findAll();
+            if (empty($taskQuestion)) {
+                return $this->json(["message" => "Entity Task question is empty"], Response::HTTP_NOT_FOUND);
+            }
+            return $this->json($taskQuestion);
+        } catch (Exception $e) {
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    #[Route('/question/{id}', name: 'get_task_question', methods: ["GET"], requirements: ['id' => '\d+'])]
+    function getTaskQuestionById(EntityManagerInterface $em, int $id): JsonResponse
+    {
+        try {
+            $taskQuestion = $em->getRepository(TaskQuestion::class)->find($id);
+            if (!$taskQuestion) {
+                return $this->json(["message" => "Task question not found"], Response::HTTP_NOT_FOUND);
+            }
+            return $this->json($taskQuestion);
+        } catch (Exception $e) {
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    #[Route('/questions', name: 'create_task_question', methods: ["POST"])]
+    function createTaskQuestion(EntityManagerInterface $em, Request $req): JsonResponse
+    {
+        try {
+            $data = json_decode($req->getContent(), true);
+            if (!$data) {
+                return $this->json(["message" => "Cannot access Data"], Response::HTTP_NOT_FOUND);
+            }
+
+            $taskQuestion = new TaskQuestion();
+            $taskQuestion->setName($data["name"]);
+            $taskQuestion->setAnswer($data["answer"]);
+            $taskQuestion->setQuestionOrder($data["questionOrder"]);
+
+            if (!isset($data["task_id"])) {
+                return $this->json(["message" => "Task id is required!!!"], Response::HTTP_BAD_REQUEST);
+            }
+
+            $task = $em->getRepository(Task::class)->find($data["task_id"]);
+            if (!$task) {
+                return $this->json(["message" => "Cannot found task in database"], Response::HTTP_NOT_FOUND);
+            }
+            $taskQuestion->setTask($task);
+            $em->persist($taskQuestion);
+            $em->flush();
+            return $this->json(["message" => "taskQuestion create successfuly"], Response::HTTP_CREATED);
+        } catch (Exception $e) {
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    #[Route('/questions/{id}', name: 'edit_task_question', methods: ["PUT"], requirements: ['id' => '\d+'])]
+    function editTaskQuestion(EntityManagerInterface $em, int $id, Request $req): JsonResponse
+    {
+        try {
+            $taskQuestion = $em->getRepository(TaskQuestion::class)->find($id);
+            if (!$taskQuestion) {
+                return $this->json(["message" => "Task question not found in database"], Response::HTTP_NOT_FOUND);
+            }
+
+            $data = json_decode($req->getContent(), true);
+            if (!$data) {
+                return $this->json(["message" => "Cannot access Data"], Response::HTTP_BAD_REQUEST);
+            }
+
+            $taskQuestion->setName($data["name"]);
+            $taskQuestion->setAnswer($data["answer"]);
+            $taskQuestion->setQuestionOrder($data["questionOrder"]);
+            $task = $em->getRepository(Task::class)->find($data["task_id"]);
+            if (!$task) {
+                return $this->json(["message" => "Cannot found task in database"], Response::HTTP_NOT_FOUND);
+            }
+            $taskQuestion->setTask($task);
+            $em->persist($taskQuestion);
+            $em->flush();
+            return $this->json(["message" => "Task question modified successfuly"], Response::HTTP_OK);
+        } catch (Exception $e) {
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+     #[Route('/questions/{id}', name: 'remove_task_question', methods: ["DELETE"], requirements: ['id' => '\d+'])]
+     function removeTaskQuestion(EntityManagerInterface $em, int $id): JsonResponse {
+        try {
+            $taskQuestion = $em->getRepository(TaskQuestion::class)->find($id);
+            if(!$taskQuestion) {
+                return $this->json(["message" => "Task question not found in database"], Response::HTTP_NOT_FOUND);
+            }
+
+            $em->remove($taskQuestion);
+            $em->flush();
+            return $this->json(["message" => "Task question removed successfuly"], Response::HTTP_OK);
+        } catch (Exception $e) {
+            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+     }
 }

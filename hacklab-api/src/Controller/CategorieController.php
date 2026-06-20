@@ -15,7 +15,8 @@ use Symfony\Component\Routing\Attribute\Route;
 final class CategorieController extends AbstractController
 {
     #[Route('', name: 'all_categories', methods: ["GET"])]
-    function getCategories(EntityManagerInterface $em): JsonResponse {
+    function getCategories(EntityManagerInterface $em): JsonResponse
+    {
         try {
             $categories = $em->getRepository(Categorie::class)->findAll();
             return $this->json($categories);
@@ -24,7 +25,7 @@ final class CategorieController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'categorie_id', methods: ["GET"])]
+    #[Route('/{id}', name: 'categorie_id', methods: ["GET"], requirements: ['id' => '\d+'])]
     function getCategorieById(EntityManagerInterface $em,  int $id ): JsonResponse {
         try {
             $categorie = $em->getRepository(Categorie::class)->find($id);
@@ -60,7 +61,7 @@ final class CategorieController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'remove_categorie', methods: ["DELETE"])]
+    #[Route('/{id}', name: 'remove_categorie', methods: ["DELETE"], requirements: ['id' => '\d+'])]
     function removeCategorie(EntityManagerInterface $em, int $id): JsonResponse {
         try {
             $categorie = $em->getRepository(Categorie::class)->find($id);

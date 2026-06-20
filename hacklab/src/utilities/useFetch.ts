@@ -1,4 +1,4 @@
-import { fetchAPI } from "./Fetchapi";
+import { fetchAPI } from "./fetchApi";
 import { useState, useEffect } from "react";
 
 export function useFetch(endpoint: string){
