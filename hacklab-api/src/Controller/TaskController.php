@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('api/task', name: 'app_task')]
 final class TaskController extends AbstractController
@@ -24,7 +26,7 @@ final class TaskController extends AbstractController
         try {
             $tasks = $em->getRepository(Task::class)->findAll();
             if (empty($tasks)) {
-                return $this->json(["message" => "Tasks not found"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Tasks not found"], Response::HTTP_NOT_FOUND);
             }
             return $this->json($tasks, Response::HTTP_OK, [], ['groups' => 'course:read']);
         } catch (Exception $e) {
@@ -38,7 +40,7 @@ final class TaskController extends AbstractController
         try {
             $task = $em->getRepository(Task::class)->find($id);
             if (!$task) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Task not found in database"], Response::HTTP_NOT_FOUND);
             }
             return $this->json($task, Response::HTTP_OK, [], ['groups' => 'course:read']);
         } catch (Exception $e) {
@@ -47,12 +49,25 @@ final class TaskController extends AbstractController
     }
 
     #[Route('', name: 'create_task', methods: ["POST"])]
-    function createTask(EntityManagerInterface $em, Request $req): JsonResponse
+    function createTask(EntityManagerInterface $em, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
             $data = json_decode($req->getContent(), true);
             if (!$data) {
                 return $this->json(["message" => "Cannot access Data."], Response::HTTP_BAD_REQUEST);
+            }
+
+            $constraints = new Assert\Collection([
+                'name' => [new Assert\NotBlank(), new Assert\Type(type: 'string'), new Assert\Length(max: 20)],
+                'content' => [new Assert\NotBlank(), new Assert\Type(type: 'string')],
+                'taskOrder' => [new Assert\NotBlank(), new Assert\Type(type: 'integer')],
+                'course_id' => [new Assert\NotBlank(), new Assert\Type(type: 'integer')],
+                'taskQuestion_id' => [new Assert\NotBlank(), new Assert\Type(type: 'integer')]
+            ]);
+
+            $errors = $validator->validate($data, $constraints);
+            if (count($errors) > 0) {
+                return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);
             }
 
             $task = new Task();
@@ -62,20 +77,11 @@ final class TaskController extends AbstractController
             $courseId = $data["course_id"];
             $taskQuestionId = $data["taskQuestion_id"];
 
-            if (!$taskQuestionId) {
-                return $this->json(["message" => "Task question not found"], Response::HTTP_NOT_FOUND);
-            }
-
             $taskQuestion = $em->getRepository(TaskQuestion::class)->find($taskQuestionId);
             if (!$taskQuestion) {
                 return $this->json(["message" => "Task question not found in database"], Response::HTTP_NOT_FOUND);
             }
             $task->addTaskQuestion($taskQuestion);
-
-
-            if (!$courseId) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_NOT_FOUND);
-            }
 
             $course = $em->getRepository(Course::class)->find($courseId);
             $task->setCourse($course);
@@ -90,22 +96,34 @@ final class TaskController extends AbstractController
     }
 
     #[Route('/{id}', name: 'edit_task', methods: ["PUT"], requirements: ['id' => '\d+'])]
-    function editTask(EntityManagerInterface $em, int $id, Request $req): JsonResponse
+    function editTask(EntityManagerInterface $em, int $id, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
             $data = json_decode($req->getContent(), true);
             if (!$data) {
                 return $this->json(["message" => "Cannot access Data"], Response::HTTP_BAD_REQUEST);
             }
-            $task = $em->getRepository(Task::class)->find($id);
-            if (!$task) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+
+            $constraints = new Assert\Collection([
+                'name' => [new Assert\NotBlank(), new Assert\Type(type: 'string'), new Assert\Length(max: 20)],
+                'content' => [new Assert\NotBlank(), new Assert\Type(type: 'string')],
+                'taskOrder' => [new Assert\NotBlank(), new Assert\Type(type: 'integer')],
+                'course_id' => [new Assert\NotBlank(), new Assert\Type(type: 'integer')],
+            ]);
+
+            $errors = $validator->validate($data, $constraints);
+            if (count($errors) > 0) {
+                return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);
             }
 
-            $courseId = $data["course_id"];
-            $course = $em->getRepository(Course::class)->find($courseId);
+            $task = $em->getRepository(Task::class)->find($id);
+            if (!$task) {
+                return $this->json(["message" => "Task not found in database"], Response::HTTP_NOT_FOUND);
+            }
+
+            $course = $em->getRepository(Course::class)->find($data["course_id"]);
             if (!$course) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Course not found"], Response::HTTP_NOT_FOUND);
             }
 
             $task->setName($data["name"]);
@@ -121,13 +139,14 @@ final class TaskController extends AbstractController
         }
     }
 
+
     #[Route('/{id}', name: 'remove_task', methods: ["DELETE"], requirements: ['id' => '\d+'])]
     function removeTask(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
             $task = $em->getRepository(Task::class)->find($id);
             if (!$task) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Task not found in database"], Response::HTTP_NOT_FOUND);
             }
 
             $em->remove($task);
@@ -139,16 +158,26 @@ final class TaskController extends AbstractController
     }
 
     #[Route('/{id}/image', name: 'set_task_image', methods: ["POST"], requirements: ['id' => '\d+'])]
-    function setTaskImage(EntityManagerInterface $em, int $id, Request $req): JsonResponse
+    function setTaskImage(EntityManagerInterface $em, int $id, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
             $data = json_decode($req->getContent(), true);
             if (!$data) {
                 return $this->json(["message" => "Cannot access Data"], Response::HTTP_BAD_REQUEST);
             }
+
+            $constraints = new Assert\Collection([
+                'imageUrl' => [new Assert\NotBlank(), new Assert\Type(type: 'string'), new Assert\Url()],
+            ]);
+
+            $errors = $validator->validate($data, $constraints);
+            if (count($errors) > 0) {
+                return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);
+            }
+
             $task = $em->getRepository(Task::class)->find($id);
             if (!$task) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Task not found in database"], Response::HTTP_NOT_FOUND);
             }
 
             $taskImage = new TaskImage();
@@ -163,13 +192,14 @@ final class TaskController extends AbstractController
         }
     }
 
+
     #[Route('/image/{id}', name: 'remove_task_image', methods: ["DELETE"], requirements: ['id' => '\d+'])]
     function removeCourseImage(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
             $taskImage = $em->getRepository(TaskImage::class)->find($id);
             if (!$taskImage) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Task image not found in database"], Response::HTTP_NOT_FOUND);
             }
 
             $em->remove($taskImage);
@@ -209,7 +239,7 @@ final class TaskController extends AbstractController
     }
 
     #[Route('/questions', name: 'create_task_question', methods: ["POST"])]
-    function createTaskQuestion(EntityManagerInterface $em, Request $req): JsonResponse
+    function createTaskQuestion(EntityManagerInterface $em, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
             $data = json_decode($req->getContent(), true);
@@ -217,14 +247,22 @@ final class TaskController extends AbstractController
                 return $this->json(["message" => "Cannot access Data"], Response::HTTP_NOT_FOUND);
             }
 
+            $constraints = new Assert\Collection([
+                'name' => [new Assert\NotBlank(), new Assert\Length(max: 80)],
+                'answer' => [new Assert\NotBlank()],
+                'questionOrder' => [new Assert\NotBlank(), new Assert\Type('integer')],
+                'task_id' => [new Assert\NotBlank(), new Assert\Type('integer')],
+            ]);
+
+            $errors = $validator->validate($data, $constraints);
+            if (count($errors) > 0) {
+                return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);
+            }
+
             $taskQuestion = new TaskQuestion();
             $taskQuestion->setName($data["name"]);
             $taskQuestion->setAnswer($data["answer"]);
             $taskQuestion->setQuestionOrder($data["questionOrder"]);
-
-            if (!isset($data["task_id"])) {
-                return $this->json(["message" => "Task id is required!!!"], Response::HTTP_BAD_REQUEST);
-            }
 
             $task = $em->getRepository(Task::class)->find($data["task_id"]);
             if (!$task) {
@@ -240,7 +278,7 @@ final class TaskController extends AbstractController
     }
 
     #[Route('/questions/{id}', name: 'edit_task_question', methods: ["PUT"], requirements: ['id' => '\d+'])]
-    function editTaskQuestion(EntityManagerInterface $em, int $id, Request $req): JsonResponse
+    function editTaskQuestion(EntityManagerInterface $em, int $id, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
             $taskQuestion = $em->getRepository(TaskQuestion::class)->find($id);
@@ -253,14 +291,28 @@ final class TaskController extends AbstractController
                 return $this->json(["message" => "Cannot access Data"], Response::HTTP_BAD_REQUEST);
             }
 
-            $taskQuestion->setName($data["name"]);
-            $taskQuestion->setAnswer($data["answer"]);
-            $taskQuestion->setQuestionOrder($data["questionOrder"]);
+            $constraints = new Assert\Collection([
+                'name' => [new Assert\NotBlank(), new Assert\Length(max: 80)],
+                'answer' => [new Assert\NotBlank()],
+                'questionOrder' => [new Assert\NotBlank(), new Assert\Type('integer')],
+                'task_id' => [new Assert\NotBlank(), new Assert\Type('integer')],
+            ]);
+
+            $errors = $validator->validate($data, $constraints);
+            if (count($errors) > 0) {
+                return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);
+            }
+
             $task = $em->getRepository(Task::class)->find($data["task_id"]);
             if (!$task) {
                 return $this->json(["message" => "Cannot found task in database"], Response::HTTP_NOT_FOUND);
             }
+
+            $taskQuestion->setName($data["name"]);
+            $taskQuestion->setAnswer($data["answer"]);
+            $taskQuestion->setQuestionOrder($data["questionOrder"]);
             $taskQuestion->setTask($task);
+
             $em->persist($taskQuestion);
             $em->flush();
             return $this->json(["message" => "Task question modified successfuly"], Response::HTTP_OK);
@@ -269,11 +321,12 @@ final class TaskController extends AbstractController
         }
     }
 
-     #[Route('/questions/{id}', name: 'remove_task_question', methods: ["DELETE"], requirements: ['id' => '\d+'])]
-     function removeTaskQuestion(EntityManagerInterface $em, int $id): JsonResponse {
+    #[Route('/questions/{id}', name: 'remove_task_question', methods: ["DELETE"], requirements: ['id' => '\d+'])]
+    function removeTaskQuestion(EntityManagerInterface $em, int $id): JsonResponse
+    {
         try {
             $taskQuestion = $em->getRepository(TaskQuestion::class)->find($id);
-            if(!$taskQuestion) {
+            if (!$taskQuestion) {
                 return $this->json(["message" => "Task question not found in database"], Response::HTTP_NOT_FOUND);
             }
 
@@ -283,5 +336,5 @@ final class TaskController extends AbstractController
         } catch (Exception $e) {
             return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
-     }
+    }
 }

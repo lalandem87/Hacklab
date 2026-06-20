@@ -17,6 +17,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('api/module', name: 'app_module')]
 final class ModuleController extends AbstractController
@@ -27,7 +29,7 @@ final class ModuleController extends AbstractController
         try {
             $modules = $em->getRepository(Module::class)->findAll();
             if (empty($modules)) {
-                return $this->json(["message" => "Modules not found"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Modules not found"], Response::HTTP_NOT_FOUND);
             }
 
             return $this->json($modules, Response::HTTP_OK, [], ['groups' => 'module:read']);
@@ -42,7 +44,7 @@ final class ModuleController extends AbstractController
         try {
             $module = $em->getRepository(Module::class)->find($id);
             if (!$module) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Module not found in database"], Response::HTTP_NOT_FOUND);
             }
             return $this->json($module,  Response::HTTP_OK, [], ['groups' => 'module:read']);
         } catch (Exception $e) {
@@ -51,7 +53,7 @@ final class ModuleController extends AbstractController
     }
 
     #[Route('', name: 'create_module', methods: ["POST"])]
-    function createModule(EntityManagerInterface $em, Request $req): JsonResponse
+    function createModule(EntityManagerInterface $em, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
             $data = json_decode($req->getContent(), true);
@@ -59,13 +61,34 @@ final class ModuleController extends AbstractController
                 return $this->json(["message" => "Cannot access Data"], Response::HTTP_BAD_REQUEST);
             }
 
-            if (!$data["course_id"] || !$data["challenge_id"] || !$data["categorie_id"]) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+            $constraints = new Assert\Collection([
+                'name' => [new Assert\NotBlank(), new Assert\Length(max: 60), new Assert\Type(type: 'string')],
+                'description' => [new Assert\NotBlank(), new Assert\Type(type: 'string')],
+                'difficulty' => [new Assert\NotBlank(), new Assert\Type(type: 'string')],
+                'course_id' => [new Assert\NotBlank(), new Assert\Type(type: 'integer')],
+                'challenge_id' => [new Assert\NotBlank(), new Assert\Type(type: 'integer')],
+                'categorie_id' => [new Assert\NotBlank(), new Assert\Type(type: 'integer')],
+            ]);
+
+            $errors = $validator->validate($data, $constraints);
+            if (count($errors) > 0) {
+                return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);
             }
 
             $course = $em->getRepository(Course::class)->find($data["course_id"]);
+            if (!$course) {
+                return $this->json(["message" => "Course not found in database"], Response::HTTP_NOT_FOUND);
+            }
+
             $challenge = $em->getRepository(Challenge::class)->find($data["challenge_id"]);
+            if (!$challenge) {
+                return $this->json(["message" => "Challenge not found in database"], Response::HTTP_NOT_FOUND);
+            }
+
             $categorie = $em->getRepository(Categorie::class)->find($data["categorie_id"]);
+            if (!$categorie) {
+                return $this->json(["message" => "Categorie not found in database"], Response::HTTP_NOT_FOUND);
+            }
 
             $module = new Module();
             $module->setName($data["name"]);
@@ -84,7 +107,7 @@ final class ModuleController extends AbstractController
     }
 
     #[Route('/{id}/submit', name: 'submit_module', methods: ["POST"], requirements: ['id' => '\d+'])]
-    function SubmitModule(EntityManagerInterface $em, int $id, Security $sec, Request $req): JsonResponse
+    function SubmitModule(EntityManagerInterface $em, int $id, Security $sec, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
 
@@ -93,9 +116,18 @@ final class ModuleController extends AbstractController
                 return $this->json(["message" => "Cannot access Data."], Response::HTTP_BAD_REQUEST);
             }
 
+            $constraints = new Assert\Collection([
+                'submittedFlag' => [new Assert\NotBlank(), new Assert\Type(type: 'string')]
+            ]);
+
+            $errors = $validator->validate($data, $constraints);
+            if( count($errors) > 0){
+                return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);
+            }
+
             $module = $em->getRepository(Module::class)->find($id);
             if (!$module) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Module not found in database"], Response::HTTP_NOT_FOUND);
             }
 
             $user = $sec->getUser();
@@ -131,13 +163,13 @@ final class ModuleController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'remove_module', methods: ["DELETE"] , requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'remove_module', methods: ["DELETE"], requirements: ['id' => '\d+'])]
     function removeModule(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
             $module = $em->getRepository(Module::class)->find($id);
             if (!$module) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Module not found in database"], Response::HTTP_NOT_FOUND);
             }
 
             $em->remove($module);

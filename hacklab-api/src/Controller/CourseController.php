@@ -13,7 +13,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Validator\Constraints\Json;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[Route('api/course', name: 'app_course')]
 final class CourseController extends AbstractController
@@ -25,7 +26,7 @@ final class CourseController extends AbstractController
         try {
             $course = $em->getRepository(Course::class)->findAll();
             if (empty($course)) {
-                return $this->json(["message" => "Courses not found."], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Courses not found."], Response::HTTP_NOT_FOUND);
             }
             return $this->json($course, Response::HTTP_OK, [], ['groups' => 'course:read']);
         } catch (Exception $e) {
@@ -39,7 +40,7 @@ final class CourseController extends AbstractController
         try {
             $course = $em->getRepository(Course::class)->find($id);
             if (!$course) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Course not found in database"], Response::HTTP_NOT_FOUND);
             }
             return $this->json($course, Response::HTTP_OK, [], ['groups' => 'course:read']);
         } catch (Exception $e) {
@@ -48,12 +49,22 @@ final class CourseController extends AbstractController
     }
 
     #[Route('', name: 'create_course', methods: ["POST"])]
-    function createCourse(EntityManagerInterface $em, Request $req): JsonResponse
+    function createCourse(EntityManagerInterface $em, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
             $data = json_decode($req->getContent(), true);
             if (!$data) {
                 return $this->json(["message" => "Cannot access Data."], Response::HTTP_BAD_REQUEST);
+            }
+
+            $constraints = new Assert\Collection([
+                'name' => [new Assert\NotBlank(), new Assert\Type(type: 'string'), new Assert\Length(max: 40)],
+                'point' => [new Assert\NotBlank(), new Assert\Type(type: 'integer')]
+            ]);
+
+            $errors = $validator->validate($data, $constraints);
+            if (count($errors) > 0) {
+                return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);
             }
 
             $course = new Course();
@@ -75,7 +86,7 @@ final class CourseController extends AbstractController
         try {
             $course = $em->getRepository(Course::class)->find($id);
             if (!$course) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Course not found in database"], Response::HTTP_NOT_FOUND);
             }
 
             $em->remove($course);
@@ -88,12 +99,12 @@ final class CourseController extends AbstractController
     }
 
     #[Route('/{id}/image', name: 'set_course_image', methods: ["POST"], requirements: ['id' => '\d+'])]
-    function setCourseImage(EntityManagerInterface $em, int $id, Request $req): JsonResponse
+    function setCourseImage(EntityManagerInterface $em, int $id, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
             $course = $em->getRepository(Course::class)->find($id);
             if (!$course) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Course not found in database"], Response::HTTP_NOT_FOUND);
             }
 
             $data = json_decode($req->getContent(), true);
@@ -101,6 +112,15 @@ final class CourseController extends AbstractController
                 return $this->json(["message" => "Cannot access Data."], Response::HTTP_BAD_REQUEST);
             }
 
+            $constraints = new Assert\Collection([
+                'imageUrl' => [new Assert\NotBlank(), new Assert\Type(type: 'string')]
+            ]);
+
+            $errors = $validator->validate($data, $constraints);
+            if (count($errors) > 0) {
+                return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);
+            }
+            
             $courseImage = new CourseImage();
             $courseImage->setImageUrl($data["imageUrl"]);
             $courseImage->setCourse($course);
@@ -120,7 +140,7 @@ final class CourseController extends AbstractController
         try {
             $courseImage = $em->getRepository(CourseImage::class)->find($id);
             if (!$courseImage) {
-                return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
+                return $this->json(["message" => "Course image not found in database"], Response::HTTP_NOT_FOUND);
             }
 
             $em->remove($courseImage);
