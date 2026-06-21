@@ -14,6 +14,9 @@ security:
         login:
             pattern: ^/api/auth/login
             stateless: true
+            login_throttling:
+                max_attempts: 5
+                interval: '1 minute'
             provider: app_user_provider
             json_login:
                 check_path: /api/auth/login
@@ -44,10 +47,18 @@ security:
     access_control:
         - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/register, roles: PUBLIC_ACCESS }
-        - { path: ^/api/user, roles: PUBLIC_ACCESS}
-        - { path: ^/api/module, roles: PUBLIC_ACCESS}
-        - { path: ^/api/categorie, roles: PUBLIC_ACCESS}
-        - { path: ^/api/task/questions, roles: PUBLIC_ACCESS}
+        - { path: ^/api/user, roles: PUBLIC_ACCESS, methods: [GET]}
+        - { path: ^/api/user, roles: ROLE_ADMIN, methods: [DELETE]}
+        - { path: ^/api/module, roles: PUBLIC_ACCESS, methods: [GET]}
+        - { path: ^/api/module, roles: ROLE_ADMIN, methods: [POST, DELETE]}
+        - { path: ^/api/task, roles: PUBLIC_ACCESS , methods: [GET]}
+        - { path: ^/api/task, roles: ROLE_ADMIN , methods: [POST, PUT, DELETE]}
+        - { path: ^/api/categorie, roles: PUBLIC_ACCESS, methods: [GET]}
+        - { path: ^/api/categorie, roles: ROLE_ADMIN, methods: [POST, DELETE]}
+        - { path: ^/api/course, roles: PUBLIC_ACCESS, methods: [GET]}
+        - { path: ^/api/course, roles: ROLE_ADMIN, methods: [POST, DELETE]}
+        - { path: ^/api/challenge, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/challenge, roles: ROLE_ADMIN, methods: [POST, DELETE]}
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
