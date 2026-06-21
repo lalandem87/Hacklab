@@ -19,6 +19,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Doctrine\DBAL\Exception as DBALException;
 
 #[Route('api/module', name: 'app_module')]
 final class ModuleController extends AbstractController
@@ -33,8 +35,10 @@ final class ModuleController extends AbstractController
             }
 
             return $this->json($modules, Response::HTTP_OK, [], ['groups' => 'module:read']);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -47,12 +51,15 @@ final class ModuleController extends AbstractController
                 return $this->json(["message" => "Module not found in database"], Response::HTTP_NOT_FOUND);
             }
             return $this->json($module,  Response::HTTP_OK, [], ['groups' => 'module:read']);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('', name: 'create_module', methods: ["POST"])]
+    #[IsGranted('ROLE_ADMIN')]
     function createModule(EntityManagerInterface $em, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
@@ -101,8 +108,10 @@ final class ModuleController extends AbstractController
             $em->persist($module);
             $em->flush();
             return $this->json(["message" => "Module successfuly created."], Response::HTTP_OK);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -121,7 +130,7 @@ final class ModuleController extends AbstractController
             ]);
 
             $errors = $validator->validate($data, $constraints);
-            if( count($errors) > 0){
+            if (count($errors) > 0) {
                 return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);
             }
 
@@ -132,6 +141,19 @@ final class ModuleController extends AbstractController
 
             $user = $sec->getUser();
             /** @var \App\Entity\User $user */
+
+            $isAlreadySubmit = $em->getRepository(UserModule::class)->findOneBy(
+                [
+                    'usr' => $user,
+                    'module' => $module,
+                    'solved' => true
+                ]
+            );
+
+            if ($isAlreadySubmit) {
+                return $this->json(["message" => "You have already submit this challenge, try another one!"], Response::HTTP_FORBIDDEN);
+            }
+
             $submittedFlag = $data["submittedFlag"];
             if ($module->getChallenge()->getFlag() === $submittedFlag) {
                 $user->setPointEarn($user->getPointEarn() + $module->getChallenge()->getPoint());
@@ -158,12 +180,15 @@ final class ModuleController extends AbstractController
             }
 
             return $this->json(["message" => "Sorry, Wrong answer", "solved" => false], Response::HTTP_BAD_REQUEST);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('/{id}', name: 'remove_module', methods: ["DELETE"], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_ADMIN')]
     function removeModule(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -175,8 +200,10 @@ final class ModuleController extends AbstractController
             $em->remove($module);
             $em->flush();
             return $this->json(["message" => "Module " . $id . " successfuly removed"], Response::HTTP_OK);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

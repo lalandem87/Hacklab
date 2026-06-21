@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Doctrine\DBAL\Exception as DBALException;
 
 #[Route('api/task', name: 'app_task')]
 final class TaskController extends AbstractController
@@ -29,8 +31,10 @@ final class TaskController extends AbstractController
                 return $this->json(["message" => "Tasks not found"], Response::HTTP_NOT_FOUND);
             }
             return $this->json($tasks, Response::HTTP_OK, [], ['groups' => 'course:read']);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -43,12 +47,15 @@ final class TaskController extends AbstractController
                 return $this->json(["message" => "Task not found in database"], Response::HTTP_NOT_FOUND);
             }
             return $this->json($task, Response::HTTP_OK, [], ['groups' => 'course:read']);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('', name: 'create_task', methods: ["POST"])]
+    #[IsGranted('ROLE_ADMIN')]
     function createTask(EntityManagerInterface $em, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
@@ -90,12 +97,15 @@ final class TaskController extends AbstractController
             $em->flush();
 
             return $this->json(["message" => "Task successfuly created."], Response::HTTP_CREATED);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('/{id}', name: 'edit_task', methods: ["PUT"], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_ADMIN')]
     function editTask(EntityManagerInterface $em, int $id, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
@@ -134,13 +144,16 @@ final class TaskController extends AbstractController
             $em->persist($task);
             $em->flush();
             return $this->json(["message" => "Task " . $id . " successfuly updated."], Response::HTTP_OK);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
 
     #[Route('/{id}', name: 'remove_task', methods: ["DELETE"], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_ADMIN')]
     function removeTask(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -152,12 +165,15 @@ final class TaskController extends AbstractController
             $em->remove($task);
             $em->flush();
             return $this->json(["message" => "Task " . $id . " successfuly removed"], Response::HTTP_OK);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('/{id}/image', name: 'set_task_image', methods: ["POST"], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_ADMIN')]
     function setTaskImage(EntityManagerInterface $em, int $id, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
@@ -187,13 +203,16 @@ final class TaskController extends AbstractController
             $em->persist($taskImage);
             $em->flush();
             return $this->json(["message" => "TaskImage successfuly created."], Response::HTTP_CREATED);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
 
     #[Route('/image/{id}', name: 'remove_task_image', methods: ["DELETE"], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_ADMIN')]
     function removeCourseImage(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -205,8 +224,10 @@ final class TaskController extends AbstractController
             $em->remove($taskImage);
             $em->flush();
             return $this->json(["message" => "TaskImage " . $id . " successfuly removed."], Response::HTTP_OK);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -219,8 +240,10 @@ final class TaskController extends AbstractController
                 return $this->json(["message" => "Entity Task question is empty"], Response::HTTP_NOT_FOUND);
             }
             return $this->json($taskQuestion);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -233,12 +256,15 @@ final class TaskController extends AbstractController
                 return $this->json(["message" => "Task question not found"], Response::HTTP_NOT_FOUND);
             }
             return $this->json($taskQuestion);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('/questions', name: 'create_task_question', methods: ["POST"])]
+    #[IsGranted('ROLE_ADMIN')]
     function createTaskQuestion(EntityManagerInterface $em, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
@@ -272,12 +298,15 @@ final class TaskController extends AbstractController
             $em->persist($taskQuestion);
             $em->flush();
             return $this->json(["message" => "taskQuestion create successfuly"], Response::HTTP_CREATED);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('/questions/{id}', name: 'edit_task_question', methods: ["PUT"], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_ADMIN')]
     function editTaskQuestion(EntityManagerInterface $em, int $id, Request $req, ValidatorInterface $validator): JsonResponse
     {
         try {
@@ -316,12 +345,15 @@ final class TaskController extends AbstractController
             $em->persist($taskQuestion);
             $em->flush();
             return $this->json(["message" => "Task question modified successfuly"], Response::HTTP_OK);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('/questions/{id}', name: 'remove_task_question', methods: ["DELETE"], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_ADMIN')]
     function removeTaskQuestion(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -333,8 +365,10 @@ final class TaskController extends AbstractController
             $em->remove($taskQuestion);
             $em->flush();
             return $this->json(["message" => "Task question removed successfuly"], Response::HTTP_OK);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Doctrine\DBAL\Exception as DBALException;
 
 #[Route('/api/categorie', name: 'app_categorie')]
 final class CategorieController extends AbstractController
@@ -25,8 +27,10 @@ final class CategorieController extends AbstractController
                 return $this->json(["message" => "Categorie Entity is empty"], Response::HTTP_BAD_REQUEST);
             }
             return $this->json($categories);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -39,13 +43,16 @@ final class CategorieController extends AbstractController
                 return $this->json(["message" => "Categorie not found in database"], Response::HTTP_NOT_FOUND);
             }
             return $this->json($categorie, Response::HTTP_OK);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
 
     #[Route('', name: 'create_categorie', methods: ["POST"])]
+    #[IsGranted('ROLE_ADMIN')]
     function CreateCategorie(Request $req, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
     {
         try {
@@ -71,12 +78,15 @@ final class CategorieController extends AbstractController
             $em->flush();
 
             return $this->json(["message" => "Categorie created with success."], Response::HTTP_CREATED);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('/{id}', name: 'remove_categorie', methods: ["DELETE"], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_ADMIN')]
     function removeCategorie(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -89,8 +99,10 @@ final class CategorieController extends AbstractController
             $em->flush();
 
             return $this->json(["message" => "Categorie " . $id . " removed with success."]);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

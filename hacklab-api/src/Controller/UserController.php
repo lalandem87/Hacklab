@@ -10,11 +10,14 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Doctrine\DBAL\Exception as DBALException;
 
 #[Route('api/user', name: 'app_user')]
 final class UserController extends AbstractController
 {
     #[Route('', name: 'all_users', methods: ["GET"])]
+    #[IsGranted('ROLE_ADMIN')]
     public function getUsers(EntityManagerInterface $em): JsonResponse
     {
         try {
@@ -23,8 +26,10 @@ final class UserController extends AbstractController
                 return $this->json(['message' => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
             }
             return $this->json($users, 200, [], ['groups' => 'user:read']);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -37,28 +42,40 @@ final class UserController extends AbstractController
                 return $this->json(["message" => "Not Authenticated"], Response::HTTP_UNAUTHORIZED);
             }
             return $this->json($user, 200, [], ['groups' => 'user:read']);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('/{id}', name: 'get_user', methods: ["GET"], requirements: ['id' => '\d+'])]
-    function getUserById(EntityManagerInterface $em, int $id): JsonResponse
+    function getUserById(EntityManagerInterface $em, int $id, Security $sec): JsonResponse
     {
         try {
+            $currentUser =  $sec->getUser();
+            /** @var \App\Entity\User $currentUser */
+
+            if($currentUser->getId() !== $id && !in_array('ROLE_ADMIN', $currentUser->getRoles())){
+                return $this->json(["message" => "Access Denied"], Response::HTTP_FORBIDDEN);
+            }
+            
             $user = $em->getRepository(User::class)->find($id);
             if (!$user) {
                 return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
             }
 
             return $this->json($user, 200, [], ['groups' => 'user:read']);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
 
     #[Route('/{id}', name: 'remove_user', methods: ["DELETE"], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_ADMIN')]
     function removeUser(EntityManagerInterface $em, int $id): JsonResponse
     {
         try {
@@ -70,8 +87,10 @@ final class UserController extends AbstractController
             $em->remove($user);
             $em->flush();
             return $this->json(["message" => "User " . $id . " successfuly removed."], Response::HTTP_OK);
-        } catch (Exception $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
