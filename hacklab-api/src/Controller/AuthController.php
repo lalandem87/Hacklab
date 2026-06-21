@@ -34,9 +34,15 @@ final class AuthController extends AbstractController
                 'password' => [new Assert\NotBlank(), new Assert\Type(type: 'string')]
             ]);
 
+            
             $errors = $validator->validate($data, $constraints);
             if (count($errors) > 0) {
                 return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);
+            }
+
+            $existingUser = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+            if ($existingUser) {
+                return $this->json(["message" => "An error occured"], Response::HTTP_BAD_REQUEST);
             }
 
             $user = new User();
