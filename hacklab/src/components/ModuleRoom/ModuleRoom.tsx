@@ -22,6 +22,24 @@ export function ModuleRoom(): JSX.Element {
   const [challengeOpen, setChallengeOpen] = useState(false);
   const [flag, setFlag] = useState("");
   const [result, setResult] = useState<any>(null);
+  const [answerQuestion, setAnswerQuestion] = useState<Record<number, string>>(
+    {},
+  );
+  const [resultQuestion, setResultQuestion] = useState<Record<number, boolean>>(
+    {},
+  );
+
+  const handleAnswer = (
+    questId: number,
+    answer: string,
+    correctAnswer: string,
+  ) => {
+    setAnswerQuestion({ ...answerQuestion, [questId]: answer });
+    setResultQuestion({
+      ...resultQuestion,
+      [questId]: answer.toLowerCase() === correctAnswer.toLowerCase(),
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,6 +122,56 @@ export function ModuleRoom(): JSX.Element {
                     <div className="dropdown-content">
                       <div className="markdown">
                         <ReactMarkDown>{tsk.content}</ReactMarkDown>
+                      </div>
+                      <div className="dropdown-questions">
+                        {tsk.taskQuestions.map((quest: any) => {
+                          return (
+                            <div key={quest.id} className="dropdown-question">
+                              <label
+                                className="dropdown-question-title"
+                                htmlFor={`q-${quest.id}`}
+                              >
+                                {quest.name}
+                              </label>
+                              <input
+                                type="text"
+                                id={`q-${quest.id}`}
+                                onChange={(e) =>
+                                  handleAnswer(
+                                    quest.id,
+                                    e.target.value,
+                                    quest.answer,
+                                  )
+                                }
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleAnswer(
+                                    quest.id,
+                                    answerQuestion[quest.id] || "",
+                                    quest.answer,
+                                  )
+                                }
+                              >
+                                Valider <ArrowRight />
+                              </button>
+                              {resultQuestion[quest.id] !== undefined && (
+                                <span
+                                  style={{
+                                    color: resultQuestion[quest.id]
+                                      ? "#00FF88"
+                                      : "#FF4444",
+                                  }}
+                                >
+                                  {resultQuestion[quest.id]
+                                    ? "✓ Correct !"
+                                    : "✗ Mauvaise réponse"}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                       <div className="dropdown-content-bottom">
                         <p>Lis attentivement avant de valider.</p>
