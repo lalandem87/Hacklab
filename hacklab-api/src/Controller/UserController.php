@@ -56,10 +56,10 @@ final class UserController extends AbstractController
             $currentUser =  $sec->getUser();
             /** @var \App\Entity\User $currentUser */
 
-            if($currentUser->getId() !== $id && !in_array('ROLE_ADMIN', $currentUser->getRoles())){
+            if ($currentUser->getId() !== $id && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
                 return $this->json(["message" => "Access Denied"], Response::HTTP_FORBIDDEN);
             }
-            
+
             $user = $em->getRepository(User::class)->find($id);
             if (!$user) {
                 return $this->json(["message" => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
@@ -87,6 +87,22 @@ final class UserController extends AbstractController
             $em->remove($user);
             $em->flush();
             return $this->json(["message" => "User " . $id . " successfuly removed."], Response::HTTP_OK);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/leaderboard', name: 'leaderboard_users', methods: ["GET"])]
+    function getLeaderboard(EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $userSort = $em->getRepository(User::class)->findBy([], ['pointEarn' => 'DESC']);
+            if (empty($userSort)) {
+                return $this->json(["message" => "Leaderboard is empty cause no player yet"], Response::HTTP_BAD_REQUEST);
+            }
+            return $this->json($userSort, 200, [], ['groups' => 'user:read']);
         } catch (DBALException) {
             return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
         } catch (Exception) {
