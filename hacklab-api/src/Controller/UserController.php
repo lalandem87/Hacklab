@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User as User;
+use App\Entity\UserCertification;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -103,6 +104,20 @@ final class UserController extends AbstractController
                 return $this->json(["message" => "Leaderboard is empty cause no player yet"], Response::HTTP_BAD_REQUEST);
             }
             return $this->json($userSort, 200, [], ['groups' => 'user:read']);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    #[Route('/certification', name: 'certification_users', methods: ["GET"])]
+    function usersCertifications(EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $usersCertifs = $em->getRepository(UserCertification::class)->findAll();
+            return $this->json($usersCertifs);
         } catch (DBALException) {
             return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
         } catch (Exception) {

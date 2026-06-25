@@ -59,6 +59,8 @@ security:
         - { path: ^/api/course, roles: ROLE_ADMIN, methods: [POST, DELETE]}
         - { path: ^/api/challenge, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/challenge, roles: ROLE_ADMIN, methods: [POST, DELETE]}
+        - { path: ^/api/certification, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/certification, roles: ROLE_ADMIN, methods: [POST, DELETE] }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

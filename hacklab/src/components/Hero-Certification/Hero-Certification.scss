@@ -1,0 +1,110 @@
+.hero-certif {
+  padding: var(--spacing-xl) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  position: relative;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)),
+    url("../../assets/background-certifpage.png");
+
+  padding: 64px 144px;
+
+  h1 {
+    font-size: var(--font-size-xxl);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    max-width: 580px;
+
+    em {
+      color: var(--primary);
+      font-style: normal;
+    }
+  }
+
+  p {
+    color: var(--text-muted);
+    font-size: var(--font-size-md);
+    max-width: 600px;
+    line-height: 1.7;
+  }
+
+  &-infos {
+    display: flex;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+
+    .container-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      background: var(--background-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 6px 12px;
+
+      .left {
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+      }
+
+      .right {
+        display: flex;
+        flex-direction: column;
+
+        .number-certif {
+          font-size: var(--font-size-lg);
+          font-weight: 700;
+          color: var(--primary);
+        }
+
+        p {
+          font-size: var(--font-size-sm);
+          color: var(--text-muted);
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  &-button {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+
+    a {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:first-child {
+        background: var(--primary);
+        color: #000;
+
+        &:hover {
+          opacity: 0.9;
+        }
+      }
+
+      &:last-child {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+
+        &:hover {
+          border-color: var(--primary);
+          color: var(--primary);
+        }
+      }
+    }
+  }
+}

@@ -5,23 +5,24 @@ import { useFetchWithToken } from "../../utilities/useFetchWithToken";
 
 export function Leaderboard(): JSX.Element {
   const { data: users, loading } = useFetch("user/leaderboard");
-  const top3 = users.slice(0, 3);
-  const others = users.slice(3, 11);
+  const top3 = users !== undefined ? users.slice(0, 3) : [];
+  const others = users !== undefined ? users.slice(3, 11) : [];
   const userToken =
     localStorage.getItem("token") ||
     sessionStorage.getItem("token") ||
     undefined;
 
   const currentUser = useFetchWithToken("user/me", "GET", userToken);
-  const myRank =
-    users.findIndex((usr: any) => usr.id === currentUser.data?.id) + 1;
+  const myRank = users
+    ? users.findIndex((usr: any) => usr.id === currentUser.data?.id) + 1
+    : 0;
 
   if (loading) return <p>Chargement...</p>;
   return (
     <section className="leaderboard">
       <div className="leaderboard-top">
         <h1>Classement</h1>
-        <p>Les meilleurs hackers de la communauté CyberLearn.</p>
+        <p>Les meilleurs hackers de la communauté Hacklab.</p>
         <div className="leaderboard-podium">
           <div className="podium-item podium-second">
             <span className="rank">2</span>

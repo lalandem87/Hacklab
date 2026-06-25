@@ -2,7 +2,7 @@ import type { JSX } from "react/jsx-runtime";
 import "./FormLogin.scss";
 import { NavLink } from "react-router";
 import React, { useState } from "react";
-import { fetchAPI } from "../../utilities/Fetchapi";
+import { fetchAPI } from "../../utilities/fetchApi";
 
 export function FormLogin(): JSX.Element {
   const [formData, setFormData] = useState({

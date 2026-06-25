@@ -34,7 +34,7 @@ final class AuthController extends AbstractController
                 'password' => [new Assert\NotBlank(), new Assert\Type(type: 'string')]
             ]);
 
-            
+
             $errors = $validator->validate($data, $constraints);
             if (count($errors) > 0) {
                 return $this->json(["message" => (string) $errors], Response::HTTP_BAD_REQUEST);

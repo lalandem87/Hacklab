@@ -176,12 +176,14 @@ class AppFixtures extends Fixture
             [
                 "name" => "Pentester",
                 "image" => "/images/certifications/pentester.png",
-                "moduleIndex" => null
+                "moduleIndex" => null,
+                "description" => "Maîtrise les techniques offensives : reconnaissance, exploitation web, injection SQL, XSS et capture de flags en conditions réelles."
             ],
             [
                 "name" => "Defender",
                 "image" => "/images/certifications/defender.png",
-                "moduleIndex" => null
+                "moduleIndex" => null,
+                "description" => "Apprends à détecter, analyser et contrer les attaques. Configuration sécurisée, analyse de logs et réponse aux incidents."
             ],
         ];
 
@@ -190,6 +192,7 @@ class AppFixtures extends Fixture
             $certification = new Certification();
             $certification->setName($certificationData["name"]);
             $certification->setImage($certificationData["image"]);
+            $certification->setDescription($certificationData["description"]);
             if ($certificationData["moduleIndex"] !== null) {
                 $certification->setModule($modules[$certificationData["moduleIndex"]]);
             }

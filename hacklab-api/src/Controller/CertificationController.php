@@ -64,6 +64,7 @@ final class CertificationController extends AbstractController
             $constraints = new Assert\Collection([
                 'name' => [new Assert\NotBlank(), new Assert\Type(type: 'string'), new Assert\Length(max: 20)],
                 'image' => [new Assert\NotBlank(), new Assert\Type(type: 'string')],
+                'description' => [new Assert\NotBlank(), new Assert\Type(type: 'string')]
             ]);
 
             $errors = $validator->validate($data, $constraints);
@@ -75,6 +76,7 @@ final class CertificationController extends AbstractController
             $certification = new Certification();
             $certification->setName($data["name"]);
             $certification->setImage($data["image"]);
+            $certification->setDescription($data["description"]);
 
             $em->persist($certification);
             $em->flush();

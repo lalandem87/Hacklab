@@ -1,7 +1,7 @@
 import type { JSX } from "react/jsx-runtime";
 import "./FormRegister.scss";
 import React, { useState } from "react";
-import { fetchAPI } from "../../utilities/Fetchapi";
+import { fetchAPI } from "../../utilities/fetchApi";
 import { NavLink } from "react-router";
 
 export function FormRegister(): JSX.Element {
