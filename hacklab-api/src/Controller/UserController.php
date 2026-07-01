@@ -23,9 +23,6 @@ final class UserController extends AbstractController
     {
         try {
             $users = $em->getRepository(User::class)->findAll();
-            if (empty($users)) {
-                return $this->json(['message' => "Oups, Bad Request"], Response::HTTP_BAD_REQUEST);
-            }
             return $this->json($users, 200, [], ['groups' => 'user:read']);
         } catch (DBALException) {
             return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);

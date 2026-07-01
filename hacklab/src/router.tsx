@@ -9,6 +9,7 @@ import { Communaute } from "./pages/Communaute";
 import { Register } from "./pages/Register";
 import { Login } from "./pages/Login";
 import { ModuleId } from "./pages/ModuleId";
+import { UserDashboard } from "./pages/UserDashboard";
 
 export function Router(): JSX.Element {
   return (
@@ -22,6 +23,8 @@ export function Router(): JSX.Element {
         <Route path="/communaute" element={<Communaute />}></Route>
         <Route path="/login" element={<Login />}></Route>
         <Route path="/register" element={<Register />}></Route>
+        <Route path="/dashboard/user/:id" element={<UserDashboard />} />
+        <Route path="*" element />
       </Routes>
     </>
   );

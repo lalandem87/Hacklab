@@ -16,6 +16,9 @@ export async function fetchAPI(endpoint: string, method: string = "GET", data?: 
         });
         if(request.ok){
             return request.json();
+        }else{
+            const error = await request.json();
+            return error;
         }
     } catch (e) {
         console.error(e);

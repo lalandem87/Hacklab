@@ -1,0 +1,49 @@
+Front-End:
+
+- React/TypeScript
+- librairis (react-markdown)
+
+Back-end:
+
+- Symfony/PHP
+- MySQL 
+- Entity, Controller, Fixtures
+- Security Hash (argon2, bcrypt)
+- route protected
+
+Installation Environnement: 
+	
+- installation Symfony, PHP
+Installation server MySQL
+Installation Docker
+Postman
+Installation VSC
+
+Creation base de donnée + API:
+
+Reflexion de chaque entity 
+Creation des tables 
+Mettre les données en base 
+Creation des controllers (CRUD)
+mise en place des fixtures
+test des routes api avec Postman
+Ajout de isGranted sur les routes
+Ajout de contraites pour les requetes POST avec Validator
+utilisation de rate-limiter pour le login
+token expire apres 1 jour
+mise en place d'un securityHeadersSubscriber
+
+
+Mise en place du front end :
+
+utilisation de vite avec react en typescript
+creation des routes pour chaque pages,
+creation des components
+utilisation de fetch
+creation dossier utilities (gagne temps)
+utilisation de lucide pour les logos
+
+
+
+
+

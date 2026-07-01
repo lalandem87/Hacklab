@@ -1,8 +1,9 @@
 import type { JSX } from "react/jsx-runtime";
 import "./FormLogin.scss";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import React, { useState } from "react";
 import { fetchAPI } from "../../utilities/fetchApi";
+import { SpaceIcon } from "lucide-react";
 
 export function FormLogin(): JSX.Element {
   const [formData, setFormData] = useState({
@@ -11,14 +12,22 @@ export function FormLogin(): JSX.Element {
   });
 
   const [remember, setRemember] = useState(false);
+  const [credentials, setCredentials] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     fetchAPI("auth/login", "POST", formData).then((r) => {
-      if (remember) {
-        localStorage.setItem("token", r.token);
+      if (r.token) {
+        if (remember) {
+          localStorage.setItem("token", r.token);
+        } else {
+          sessionStorage.setItem("token", r.token);
+        }
+        navigate("/");
       } else {
-        sessionStorage.setItem("token", r.token);
+        setCredentials(true);
       }
     });
   };
@@ -64,6 +73,7 @@ export function FormLogin(): JSX.Element {
           <NavLink to="/resetpasswd">Mot de passe oublié</NavLink>
         </div>
         <button type="submit">Se connecter</button>
+        {credentials && <span>Identifiant incorrect ...</span>}
       </form>
       <div className="signup">
         Pas encore de compte ?

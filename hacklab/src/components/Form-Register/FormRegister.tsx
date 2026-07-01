@@ -2,7 +2,7 @@ import type { JSX } from "react/jsx-runtime";
 import "./FormRegister.scss";
 import React, { useState } from "react";
 import { fetchAPI } from "../../utilities/fetchApi";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 
 export function FormRegister(): JSX.Element {
   const [formData, setFormData] = useState({
@@ -11,10 +11,16 @@ export function FormRegister(): JSX.Element {
     password: "",
   });
 
+  const navigate = useNavigate();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     fetchAPI("auth/register", "POST", formData)
-      .then((r) => console.log(r))
+      .then((r) => {
+        if (r.message) {
+          navigate("/login");
+        }
+      })
       .catch((e) => console.error(e));
   };
   return (

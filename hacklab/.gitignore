@@ -11,7 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
-./help.txt
+help.txt
 
 # Editor directories and files
 .vscode/*
