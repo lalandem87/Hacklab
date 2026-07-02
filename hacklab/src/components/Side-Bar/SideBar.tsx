@@ -1,6 +1,7 @@
 import type { JSX } from "react/jsx-runtime";
 import { useFetch } from "../../utilities/useFetch";
 import "./SideBar.scss";
+import { useState } from "react";
 
 interface SideBarProps {
   onCatChange: (cat: string) => void;
@@ -12,6 +13,8 @@ export function SideBar({
   onDiffChange,
 }: SideBarProps): JSX.Element {
   const { data: categories, loading } = useFetch("categorie");
+  const [activeCat, setActiveCat] = useState("Tous");
+  const [activeDiff, setActiveDiff] = useState("Tous");
 
   if (loading) return <p>Chargement...</p>;
 
@@ -20,10 +23,25 @@ export function SideBar({
       <div className="side-bar-wrapper">
         <div className="side-bar-wrapper-title">Catégorie</div>
         <div className="side-bar-wrapper-cats">
-          <button onClick={() => onCatChange("Tous")}>Tous</button>
+          <button
+            className={activeCat === "Tous" ? "active" : ""}
+            onClick={() => {
+              onCatChange("Tous");
+              setActiveCat("Tous");
+            }}
+          >
+            Tous
+          </button>
           {categories.map((cat) => {
             return (
-              <button key={cat.id} onClick={() => onCatChange(cat.name)}>
+              <button
+                className={activeCat === cat.name ? "active" : ""}
+                key={cat.id}
+                onClick={() => {
+                  onCatChange(cat.name);
+                  setActiveCat(cat.name);
+                }}
+              >
                 {cat.name}
               </button>
             );
@@ -33,12 +51,42 @@ export function SideBar({
       <div className="side-bar-wrapper">
         <div className="side-bar-wrapper-title">Difficulté</div>
         <div className="side-bar-wrapper-dif">
-          <button onClick={() => onDiffChange("Tous")}>Tous niveaux</button>
-          <button onClick={() => onDiffChange("Facile")}>Débutant</button>
-          <button onClick={() => onDiffChange("Intermediaire")}>
+          <button
+            className={activeDiff === "Tous" ? "active" : ""}
+            onClick={() => {
+              onDiffChange("Tous");
+              setActiveDiff("Tous");
+            }}
+          >
+            Tous niveaux
+          </button>
+          <button
+            className={activeDiff === "Facile" ? "active" : ""}
+            onClick={() => {
+              onDiffChange("Facile");
+              setActiveDiff("Facile");
+            }}
+          >
+            Débutant
+          </button>
+          <button
+            className={activeDiff === "Intermediaire" ? "active" : ""}
+            onClick={() => {
+              onDiffChange("Intermediaire");
+              setActiveDiff("Intermediaire");
+            }}
+          >
             Intermédiaire
           </button>
-          <button onClick={() => onDiffChange("Avance")}>Avancé</button>
+          <button
+            className={activeDiff === "Avance" ? "active" : ""}
+            onClick={() => {
+              onDiffChange("Avance");
+              setActiveDiff("Avance");
+            }}
+          >
+            Avancé
+          </button>
         </div>
       </div>
     </section>

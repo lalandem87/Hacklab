@@ -38,8 +38,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $pointEarn = null;
 
     #[ORM\Column]
-   
-    #[Groups(['course:read', 'user:read'])]
     private array $roles = [];
 
     /**
@@ -56,10 +54,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['course:read', 'user:read'])]
     private Collection $userCertifications;
 
+    /**
+     * @var Collection<int, UserTask>
+     */
+    #[ORM\OneToMany(targetEntity: UserTask::class, mappedBy: 'usr')]
+    #[Groups(['user:read'])]
+    private Collection $userTasks;
+
+    /**
+     * @var Collection<int, UserTaskQuestion>
+     */
+    #[ORM\OneToMany(targetEntity: UserTaskQuestion::class, mappedBy: 'usr')]
+    #[Groups(['user:read'])]
+    private Collection $userTaskQuestions;
+
     public function __construct()
     {
         $this->userModules = new ArrayCollection();
         $this->userCertifications = new ArrayCollection();
+        $this->userTasks = new ArrayCollection();
+        $this->userTaskQuestions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -196,6 +210,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($userCertification->getUsr() === $this) {
                 $userCertification->setUsr(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserTask>
+     */
+    public function getUserTasks(): Collection
+    {
+        return $this->userTasks;
+    }
+
+    public function addUserTask(UserTask $userTask): static
+    {
+        if (!$this->userTasks->contains($userTask)) {
+            $this->userTasks->add($userTask);
+            $userTask->setUsr($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserTask(UserTask $userTask): static
+    {
+        if ($this->userTasks->removeElement($userTask)) {
+            // set the owning side to null (unless already changed)
+            if ($userTask->getUsr() === $this) {
+                $userTask->setUsr(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserTaskQuestion>
+     */
+    public function getUserTaskQuestions(): Collection
+    {
+        return $this->userTaskQuestions;
+    }
+
+    public function addUserTaskQuestion(UserTaskQuestion $userTaskQuestion): static
+    {
+        if (!$this->userTaskQuestions->contains($userTaskQuestion)) {
+            $this->userTaskQuestions->add($userTaskQuestion);
+            $userTaskQuestion->setUsr($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserTaskQuestion(UserTaskQuestion $userTaskQuestion): static
+    {
+        if ($this->userTaskQuestions->removeElement($userTaskQuestion)) {
+            // set the owning side to null (unless already changed)
+            if ($userTaskQuestion->getUsr() === $this) {
+                $userTaskQuestion->setUsr(null);
             }
         }
 

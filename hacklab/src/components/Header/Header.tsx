@@ -2,22 +2,18 @@ import type { JSX } from "react/jsx-runtime";
 import { NavLink, useNavigate } from "react-router";
 import "./Header.scss";
 import { useFetchWithToken } from "../../utilities/useFetchWithToken";
-import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 export function Header(): JSX.Element {
-  const [token, setToken] = useState(
-    localStorage.getItem("token") ||
-      sessionStorage.getItem("token") ||
-      undefined,
-  );
+  const { token, setToken } = useAuth();
 
   const { data: me } = useFetchWithToken("user/me", "GET", token);
   const navigate = useNavigate();
   const deconnect = () => {
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
-    navigate("/");
     setToken(undefined);
+    navigate("/");
   };
 
   return (
@@ -28,7 +24,7 @@ export function Header(): JSX.Element {
           <span className="logo-text">Hacklab</span>
         </div>
         <nav>
-          <NavLink to="/">Home</NavLink>
+          <NavLink to="/">Accueil</NavLink>
           <NavLink to="/module">Modules</NavLink>
           <NavLink to="/classement">Classement</NavLink>
           <NavLink to="/certification">Certifications</NavLink>
@@ -36,8 +32,12 @@ export function Header(): JSX.Element {
         </nav>
         {token ? (
           <div className="login-part">
-            <NavLink to={`/dashboard/user/${me?.id}`}>Mon profil</NavLink>
-            <button onClick={deconnect}>Déconnection</button>
+            <NavLink className="my-profil" to={`/dashboard/user/${me?.id}`}>
+              Mon profil
+            </NavLink>
+            <button className="btn-deconnect" onClick={deconnect}>
+              Déconnection
+            </button>
           </div>
         ) : (
           <div className="login-part">

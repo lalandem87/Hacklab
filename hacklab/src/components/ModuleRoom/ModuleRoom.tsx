@@ -10,14 +10,18 @@ import {
   Check,
   Play,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { fetchAPI } from "../../utilities/fetchApi";
 import ReactMarkDown from "react-markdown";
+import { useAuth } from "../../context/AuthContext";
+import { useFetchWithToken } from "../../utilities/useFetchWithToken";
 
 export function ModuleRoom(): JSX.Element {
   const { id } = useParams();
   const { data: module, loading } = useFetchOne(`module/${id}`);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [completedTasks, setCompletedTasks] = useState<Record<number, boolean>>(
+    {},
+  );
   const [openTask, setOpenTask] = useState<number | null>(null);
   const [challengeOpen, setChallengeOpen] = useState(false);
   const [flag, setFlag] = useState("");
@@ -28,31 +32,77 @@ export function ModuleRoom(): JSX.Element {
   const [resultQuestion, setResultQuestion] = useState<Record<number, boolean>>(
     {},
   );
+  const { token } = useAuth();
+  const { data: me } = useFetchWithToken("user/me", "GET", token);
 
-  const handleAnswer = (
-    questId: number,
-    answer: string,
-    correctAnswer: string,
-  ) => {
-    setAnswerQuestion({ ...answerQuestion, [questId]: answer });
-    setResultQuestion({
-      ...resultQuestion,
-      [questId]: answer.toLowerCase() === correctAnswer.toLowerCase(),
+  useEffect(() => {
+    if (!me) return;
+
+    const tasks: Record<number, boolean> = {};
+    me.userTasks?.forEach((ut: any) => {
+      tasks[ut.task.id] = ut.solved;
     });
+    setCompletedTasks(tasks);
+
+    const questions: Record<number, boolean> = {};
+    me.userTaskQuestions?.forEach((utq: any) => {
+      questions[utq.question.id] = utq.solved;
+    });
+    setResultQuestion(questions);
+
+    const answers: Record<number, string> = {};
+    me.userTaskQuestions?.forEach((utq: any) => {
+      answers[utq.question.id] = utq.submittedAnswer;
+    });
+    setAnswerQuestion(answers);
+
+    const solvedModule = me.userModules?.find(
+      (um: any) => um.module?.id === Number(id),
+    );
+    if (solvedModule) {
+      setResult({ message: "Module déjà complété !" });
+      setFlag(solvedModule.submittedFlag);
+    }
+  }, [me]);
+
+  const handleAnswer = (questId: number, answer: string) => {
+    setAnswerQuestion({ ...answerQuestion, [questId]: answer });
+    fetchAPI(
+      `task/questions/${questId}/verify`,
+      "POST",
+      { answer },
+      token || undefined,
+    ).then((r) => {
+      if (r.correct !== undefined) {
+        setResultQuestion({ ...resultQuestion, [questId]: r.correct });
+      }
+    });
+  };
+
+  const handleCompletedTask = (taskId: number) => {
+    fetchAPI(`task/${taskId}/verify`, "POST", undefined, token)
+      .then(() => {
+        setCompletedTasks({ ...completedTasks, [taskId]: true });
+      })
+      .catch((e) => console.error(e));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const token =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
     if (token) {
       fetchAPI(
         `module/${id}/submit`,
         "POST",
-        { submittedFlag: flag },
+        { submittedFlag: decodeURIComponent(flag) },
         token,
       ).then((r) => setResult(r));
     }
+  };
+
+  const isTaskValid = (tsk: any) => {
+    return tsk.taskQuestions.every(
+      (quest: any) => resultQuestion[quest.id] === true,
+    );
   };
 
   if (loading) return <p>Chargement...</p>;
@@ -84,13 +134,20 @@ export function ModuleRoom(): JSX.Element {
             {module.course.task.map((tsk: any, index: number) => {
               return (
                 <div key={tsk.id} className="dropdown">
-                  <div className="dropdown-intro">
+                  <div
+                    className="dropdown-intro"
+                    onClick={() =>
+                      setOpenTask(openTask === tsk.id ? null : tsk.id)
+                    }
+                  >
                     <div className="dropdown-intro-left">
                       <div
                         className="checked"
                         style={{
-                          backgroundColor: isCompleted ? "#0D2A1F" : "#1A2330",
-                          color: isCompleted ? "#00FF88" : "#5A7A8A",
+                          backgroundColor: completedTasks[tsk.id]
+                            ? "#0D2A1F"
+                            : "#1A2330",
+                          color: completedTasks[tsk.id] ? "#00FF88" : "#5A7A8A",
                         }}
                       >
                         <Check />
@@ -99,21 +156,22 @@ export function ModuleRoom(): JSX.Element {
                       <p>{tsk.name}</p>
                     </div>
                     <div className="dropdown-intro-right">
-                      <em
-                        style={{
-                          backgroundColor: isCompleted ? "#0D2A1F" : "#1A2330",
-                          color: isCompleted ? "#00FF88" : "#5A7A8A",
-                        }}
-                        className="completed"
-                      >
-                        Complété
-                      </em>
-                      <div
-                        className="dropdown-arrow"
-                        onClick={() =>
-                          setOpenTask(openTask === tsk.id ? null : tsk.id)
-                        }
-                      >
+                      {completedTasks[tsk.id] && (
+                        <em
+                          style={{
+                            backgroundColor: completedTasks[tsk.id]
+                              ? "#0D2A1F"
+                              : "#1A2330",
+                            color: completedTasks[tsk.id]
+                              ? "#00FF88"
+                              : "#5A7A8A",
+                          }}
+                          className="completed"
+                        >
+                          Complété
+                        </em>
+                      )}
+                      <div className="dropdown-arrow">
                         {openTask === tsk.id ? <ArrowUp /> : <ArrowDown />}
                       </div>
                     </div>
@@ -136,12 +194,12 @@ export function ModuleRoom(): JSX.Element {
                               <input
                                 type="text"
                                 id={`q-${quest.id}`}
+                                value={answerQuestion[quest.id] || ""}
                                 onChange={(e) =>
-                                  handleAnswer(
-                                    quest.id,
-                                    e.target.value,
-                                    quest.answer,
-                                  )
+                                  setAnswerQuestion({
+                                    ...answerQuestion,
+                                    [quest.id]: e.target.value,
+                                  })
                                 }
                               />
                               <button
@@ -150,7 +208,6 @@ export function ModuleRoom(): JSX.Element {
                                   handleAnswer(
                                     quest.id,
                                     answerQuestion[quest.id] || "",
-                                    quest.answer,
                                   )
                                 }
                               >
@@ -175,7 +232,10 @@ export function ModuleRoom(): JSX.Element {
                       </div>
                       <div className="dropdown-content-bottom">
                         <p>Lis attentivement avant de valider.</p>
-                        <button onClick={() => setIsCompleted(!isCompleted)}>
+                        <button
+                          disabled={!isTaskValid(tsk)}
+                          onClick={() => handleCompletedTask(tsk.id)}
+                        >
                           Valider la tâche <ArrowRight />
                         </button>
                       </div>
@@ -192,7 +252,10 @@ export function ModuleRoom(): JSX.Element {
             <h2>Mise en pratique</h2>
             <div className="module-container-challenge-task">
               <div className="dropdown-challenge">
-                <div className="dropdown-challenge-intro">
+                <div
+                  className="dropdown-challenge-intro"
+                  onClick={() => setChallengeOpen(!challengeOpen)}
+                >
                   <div className="dropdown-challenge-intro-left">
                     <div className="dropdown-challenge-intro-left-title">
                       Challenge
@@ -201,10 +264,7 @@ export function ModuleRoom(): JSX.Element {
                   </div>
                   <div className="dropdown-challenge-intro-right">
                     <em>{module.challenge.point} points</em>
-                    <div
-                      className="dropdown-arrow"
-                      onClick={() => setChallengeOpen(!challengeOpen)}
-                    >
+                    <div className="dropdown-arrow">
                       {challengeOpen ? <ArrowUp /> : <ArrowDown />}
                     </div>
                   </div>
@@ -218,6 +278,7 @@ export function ModuleRoom(): JSX.Element {
                           type="text"
                           name="flag"
                           id="flag"
+                          value={flag}
                           placeholder="FLAG{...}"
                           onChange={(e) => setFlag(e.target.value)}
                         />

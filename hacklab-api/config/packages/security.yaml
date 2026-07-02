@@ -49,8 +49,11 @@ security:
         - { path: ^/api/auth/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/user, roles: PUBLIC_ACCESS, methods: [GET]}
         - { path: ^/api/user, roles: ROLE_ADMIN, methods: [DELETE]}
+        - { path: ^/api/module/\d+/submit, roles: IS_AUTHENTICATED_FULLY, methods: [POST]}
         - { path: ^/api/module, roles: PUBLIC_ACCESS, methods: [GET]}
         - { path: ^/api/module, roles: ROLE_ADMIN, methods: [POST, DELETE]}
+        - { path: ^/api/task/\d+/verify, roles: IS_AUTHENTICATED_FULLY , methods: [POST]}
+        - { path: ^/api/task/questions/\d+/verify, roles: IS_AUTHENTICATED_FULLY , methods: [POST]}
         - { path: ^/api/task, roles: PUBLIC_ACCESS , methods: [GET]}
         - { path: ^/api/task, roles: ROLE_ADMIN , methods: [POST, PUT, DELETE]}
         - { path: ^/api/categorie, roles: PUBLIC_ACCESS, methods: [GET]}

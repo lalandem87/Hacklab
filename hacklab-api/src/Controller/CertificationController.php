@@ -24,9 +24,6 @@ final class CertificationController extends AbstractController
     {
         try {
             $certifications = $em->getRepository(Certification::class)->findAll();
-            if (empty($certifications)) {
-                return $this->json(["message" => "Certifications not found"], Response::HTTP_NOT_FOUND);
-            }
             return $this->json($certifications);
         } catch (DBALException) {
             return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);

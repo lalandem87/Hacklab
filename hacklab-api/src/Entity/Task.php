@@ -48,10 +48,24 @@ class Task
     #[Groups(['course:read', 'module:read'])]
     private Collection $taskQuestions;
 
+    /**
+     * @var Collection<int, UserTask>
+     */
+    #[ORM\OneToMany(targetEntity: UserTask::class, mappedBy: 'task')]
+    private Collection $userTasks;
+
+    /**
+     * @var Collection<int, UserTaskQuestion>
+     */
+    #[ORM\OneToMany(targetEntity: UserTaskQuestion::class, mappedBy: 'task')]
+    private Collection $userTaskQuestions;
+
     public function __construct()
     {
         $this->taskImages = new ArrayCollection();
         $this->taskQuestions = new ArrayCollection();
+        $this->userTasks = new ArrayCollection();
+        $this->userTaskQuestions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -161,6 +175,66 @@ class Task
             // set the owning side to null (unless already changed)
             if ($taskQuestion->getTask() === $this) {
                 $taskQuestion->setTask(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserTask>
+     */
+    public function getUserTasks(): Collection
+    {
+        return $this->userTasks;
+    }
+
+    public function addUserTask(UserTask $userTask): static
+    {
+        if (!$this->userTasks->contains($userTask)) {
+            $this->userTasks->add($userTask);
+            $userTask->setTask($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserTask(UserTask $userTask): static
+    {
+        if ($this->userTasks->removeElement($userTask)) {
+            // set the owning side to null (unless already changed)
+            if ($userTask->getTask() === $this) {
+                $userTask->setTask(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserTaskQuestion>
+     */
+    public function getUserTaskQuestions(): Collection
+    {
+        return $this->userTaskQuestions;
+    }
+
+    public function addUserTaskQuestion(UserTaskQuestion $userTaskQuestion): static
+    {
+        if (!$this->userTaskQuestions->contains($userTaskQuestion)) {
+            $this->userTaskQuestions->add($userTaskQuestion);
+            $userTaskQuestion->setTask($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserTaskQuestion(UserTaskQuestion $userTaskQuestion): static
+    {
+        if ($this->userTaskQuestions->removeElement($userTaskQuestion)) {
+            // set the owning side to null (unless already changed)
+            if ($userTaskQuestion->getTask() === $this) {
+                $userTaskQuestion->setTask(null);
             }
         }
 

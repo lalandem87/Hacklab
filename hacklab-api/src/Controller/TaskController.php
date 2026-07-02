@@ -6,6 +6,8 @@ use App\Entity\Task as Task;
 use App\Entity\Course as Course;
 use App\Entity\TaskImage as TaskImage;
 use App\Entity\TaskQuestion;
+use App\Entity\UserTask;
+use App\Entity\UserTaskQuestion;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,6 +19,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\DBAL\Exception as DBALException;
+use Symfony\Bundle\SecurityBundle\Security;
 
 #[Route('api/task', name: 'app_task')]
 final class TaskController extends AbstractController
@@ -365,6 +368,102 @@ final class TaskController extends AbstractController
             $em->remove($taskQuestion);
             $em->flush();
             return $this->json(["message" => "Task question removed successfuly"], Response::HTTP_OK);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/questions/{id}/verify', name: 'verify_task_question', methods: ["POST"], requirements: ['id' => '\d+'])]
+    function verifyTaskQuestion(Security $sec, Request $req, ValidatorInterface $validator, EntityManagerInterface $em, int $id): JsonResponse
+    {
+        try {
+            $data = json_decode($req->getContent(), true);
+            if (!$data) {
+                return $this->json(["message" => "Cannot access Data."], Response::HTTP_BAD_REQUEST);
+            }
+
+            $constraints = new Assert\Collection([
+                'answer' => [new Assert\NotBlank(), new Assert\Type(type: 'string')]
+            ]);
+
+            $errors = $validator->validate($data, $constraints);
+            if (count($errors) > 0) {
+                return $this->json(["message" => (string) $errors], Response::HTTP_BAD_GATEWAY);
+            }
+
+            /** @var \App\Entity\User $currentUser */
+            $currentUser = $sec->getUser();
+            $taskQuestion = $em->getRepository(TaskQuestion::class)->find($id);
+            if (!$taskQuestion) {
+                return $this->json(["message" => "Task question not found in database"], Response::HTTP_NOT_FOUND);
+            }
+
+            $alreadySubmit = $em->getRepository(UserTaskQuestion::class)->findOneBy([
+                'usr' => $currentUser,
+                'question' => $taskQuestion,
+                'solved' => true
+            ]);
+
+            if ($alreadySubmit) {
+                return $this->json(["message" => "You have already answered this question"], Response::HTTP_BAD_REQUEST);
+            }
+
+            /** @var \App\Entity\TaskQuestion $taskQuestion */
+            $taskQuestion = $em->getRepository(TaskQuestion::class)->find($id);
+            if (!$taskQuestion) {
+                return $this->json(["message" => "Task question doesn't exist in database"], Response::HTTP_NOT_FOUND);
+            }
+
+            $isCorrect = strtolower($taskQuestion->getAnswer()) === strtolower($data["answer"]);
+            if ($isCorrect) {
+                $userTaskQuestion = new UserTaskQuestion();
+                $userTaskQuestion->setUsr($currentUser);
+                $userTaskQuestion->setQuestion($taskQuestion);
+                $userTaskQuestion->setSubmittedAnswer($data["answer"]);
+                $userTaskQuestion->setSolved(true);
+                $em->persist($userTaskQuestion);
+                $em->flush();
+            }
+            return $this->json(["correct" => $isCorrect]);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/{id}/verify', name: 'verify_task', methods: ["POST"], requirements: ['id' => '\d+'])]
+    function verifyTask(Security $sec,  int $id, EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $task = $em->getRepository(Task::class)->find($id);
+            if (!$task) {
+                return $this->json(["message" => "Task not found"], Response::HTTP_NOT_FOUND);
+            }
+
+            /** @var \App\Entity\User $currentUser */
+            $currentUser = $sec->getUser();
+
+            $alreadySubmit = $em->getRepository(UserTask::class)->findOneBy([
+                'usr' => $currentUser,
+                'task' => $task,
+                'solved' => true
+            ]);
+
+            if ($alreadySubmit) {
+                return $this->json(["message" => "You have already completed this task"], Response::HTTP_CONFLICT);
+            }
+
+            $userTask = new UserTask();
+            $userTask->setUsr($currentUser);
+            $userTask->setTask($task);
+            $userTask->setSolved(true);
+
+            $em->persist($userTask);
+            $em->flush();
+            return $this->json(["message" => "Task completed successfuly"], Response::HTTP_CREATED);
         } catch (DBALException) {
             return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
         } catch (Exception) {

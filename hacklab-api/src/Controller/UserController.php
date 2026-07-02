@@ -108,7 +108,6 @@ final class UserController extends AbstractController
         }
     }
 
-
     #[Route('/certification', name: 'certification_users', methods: ["GET"])]
     function usersCertifications(EntityManagerInterface $em): JsonResponse
     {
@@ -121,4 +120,27 @@ final class UserController extends AbstractController
             return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    #[Route('/{id}/certification', name: 'certification_user', methods: ["GET"], requirements: ['id' => '\d+'])]
+    function userCertifications(int $id, Security $sec): JsonResponse
+    {
+        try {
+            /** @var \App\Entity\User $currentUser */
+            $currentUser = $sec->getUser();
+            if ($currentUser->getId() !== $id && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
+                return $this->json(["Access Denied!"], Response::HTTP_UNAUTHORIZED);
+            }
+
+            $userCertifs = $currentUser->getUserCertifications();
+
+            return $this->json($userCertifs);
+        } catch (DBALException) {
+            return $this->json(["message" => "Database error"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception) {
+            return $this->json(["message" => "An error occured"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 }

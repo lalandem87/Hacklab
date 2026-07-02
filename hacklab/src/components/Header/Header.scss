@@ -52,12 +52,32 @@ header {
       }
     }
 
-    .btn-start {
+    .btn-start,
+    .my-profil {
       font-weight: 600;
       background-color: var(--primary);
       padding: 8px 16px;
       border-radius: var(--radius-sm);
       color: #0a0e12;
+    }
+
+    .btn-deconnect {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      background: transparent;
+      border: 1px solid #ff4444;
+      border-radius: var(--radius-md);
+      color: #ff4444;
+      padding: var(--spacing-sm) var(--spacing-md);
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      transition: all 0.2s;
+
+      &:hover {
+        background: rgba(255, 68, 68, 0.1);
+      }
     }
   }
 }

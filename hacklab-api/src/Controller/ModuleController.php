@@ -155,7 +155,7 @@ final class ModuleController extends AbstractController
             }
 
             $submittedFlag = $data["submittedFlag"];
-            if ($module->getChallenge()->getFlag() === $submittedFlag) {
+            if (strtolower($module->getChallenge()->getFlag()) === strtolower($submittedFlag)) {
                 $user->setPointEarn($user->getPointEarn() + $module->getChallenge()->getPoint());
 
                 $userModule = new UserModule();

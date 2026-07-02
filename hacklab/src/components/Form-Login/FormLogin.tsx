@@ -3,7 +3,7 @@ import "./FormLogin.scss";
 import { NavLink, useNavigate } from "react-router";
 import React, { useState } from "react";
 import { fetchAPI } from "../../utilities/fetchApi";
-import { SpaceIcon } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 export function FormLogin(): JSX.Element {
   const [formData, setFormData] = useState({
@@ -15,6 +15,7 @@ export function FormLogin(): JSX.Element {
   const [credentials, setCredentials] = useState(false);
 
   const navigate = useNavigate();
+  const { setToken } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +26,7 @@ export function FormLogin(): JSX.Element {
         } else {
           sessionStorage.setItem("token", r.token);
         }
+        setToken(r.token);
         navigate("/");
       } else {
         setCredentials(true);
