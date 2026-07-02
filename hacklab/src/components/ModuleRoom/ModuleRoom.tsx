@@ -15,6 +15,7 @@ import { fetchAPI } from "../../utilities/fetchApi";
 import ReactMarkDown from "react-markdown";
 import { useAuth } from "../../context/AuthContext";
 import { useFetchWithToken } from "../../utilities/useFetchWithToken";
+import { Toast } from "../Toast/Toast";
 
 export function ModuleRoom(): JSX.Element {
   const { id } = useParams();
@@ -32,6 +33,12 @@ export function ModuleRoom(): JSX.Element {
   const [resultQuestion, setResultQuestion] = useState<Record<number, boolean>>(
     {},
   );
+
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
   const { token } = useAuth();
   const { data: me } = useFetchWithToken("user/me", "GET", token);
 
@@ -75,14 +82,39 @@ export function ModuleRoom(): JSX.Element {
     ).then((r) => {
       if (r.correct !== undefined) {
         setResultQuestion({ ...resultQuestion, [questId]: r.correct });
+        setToast({
+          message: r.correct ? "Bonne réponse !" : "Mauvaise réponse",
+          type: r.correct ? "success" : "error",
+        });
       }
     });
   };
 
-  const handleCompletedTask = (taskId: number) => {
+  const isTaskValid = (tsk: any) => {
+    return tsk.taskQuestions.every(
+      (quest: any) => resultQuestion[quest.id] === true,
+    );
+  };
+
+  const handleCompletedTask = (taskId: number, tsk: any) => {
+    if (!isTaskValid(tsk)) {
+      setToast({
+        message: "Réponds à toutes les questions avant de valider",
+        type: "error",
+      });
+      return;
+    }
     fetchAPI(`task/${taskId}/verify`, "POST", undefined, token)
-      .then(() => {
-        setCompletedTasks({ ...completedTasks, [taskId]: true });
+      .then((r) => {
+        if (r.message?.includes("completed")) {
+          setCompletedTasks({ ...completedTasks, [taskId]: true });
+        }
+        setToast({
+          message: r.message?.includes("completed")
+            ? "Tâche complété"
+            : r.message,
+          type: r.message?.includes("completed") ? "success" : "error",
+        });
       })
       .catch((e) => console.error(e));
   };
@@ -95,14 +127,14 @@ export function ModuleRoom(): JSX.Element {
         "POST",
         { submittedFlag: decodeURIComponent(flag) },
         token,
-      ).then((r) => setResult(r));
+      ).then((r) => {
+        setResult(r);
+        setToast({
+          message: r.message,
+          type: r.message?.includes("done") ? "success" : "error",
+        });
+      });
     }
-  };
-
-  const isTaskValid = (tsk: any) => {
-    return tsk.taskQuestions.every(
-      (quest: any) => resultQuestion[quest.id] === true,
-    );
   };
 
   if (loading) return <p>Chargement...</p>;
@@ -213,19 +245,6 @@ export function ModuleRoom(): JSX.Element {
                               >
                                 Valider <ArrowRight />
                               </button>
-                              {resultQuestion[quest.id] !== undefined && (
-                                <span
-                                  style={{
-                                    color: resultQuestion[quest.id]
-                                      ? "#00FF88"
-                                      : "#FF4444",
-                                  }}
-                                >
-                                  {resultQuestion[quest.id]
-                                    ? "✓ Correct !"
-                                    : "✗ Mauvaise réponse"}
-                                </span>
-                              )}
                             </div>
                           );
                         })}
@@ -233,8 +252,7 @@ export function ModuleRoom(): JSX.Element {
                       <div className="dropdown-content-bottom">
                         <p>Lis attentivement avant de valider.</p>
                         <button
-                          disabled={!isTaskValid(tsk)}
-                          onClick={() => handleCompletedTask(tsk.id)}
+                          onClick={() => handleCompletedTask(tsk.id, tsk)}
                         >
                           Valider la tâche <ArrowRight />
                         </button>
@@ -286,7 +304,6 @@ export function ModuleRoom(): JSX.Element {
                           Valider la tâche <ArrowRight />
                         </button>
                       </form>
-                      {result && <p>{result.message}</p>}
                     </div>
                   </div>
                 )}
@@ -295,6 +312,13 @@ export function ModuleRoom(): JSX.Element {
           </div>
         </div>
       </div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </section>
   );
 }

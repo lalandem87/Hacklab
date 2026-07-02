@@ -11,19 +11,35 @@ import { Login } from "./pages/Login";
 import { ModuleId } from "./pages/ModuleId";
 import { UserDashboard } from "./pages/UserDashboard";
 
+import { ProtectedRoute } from "./components/Protected-Route/ProtectedRoute";
+
 export function Router(): JSX.Element {
   return (
     <>
       <Routes>
         <Route path="/" element={<Home />}></Route>
         <Route path="/module" element={<Module />}></Route>
-        <Route path="/module/:id" element={<ModuleId />}></Route>
+        <Route
+          path="/module/:id"
+          element={
+            <ProtectedRoute>
+              <ModuleId />
+            </ProtectedRoute>
+          }
+        ></Route>
         <Route path="/classement" element={<Classement />}></Route>
         <Route path="/certification" element={<Certification />}></Route>
         <Route path="/communaute" element={<Communaute />}></Route>
         <Route path="/login" element={<Login />}></Route>
         <Route path="/register" element={<Register />}></Route>
-        <Route path="/dashboard/user/:id" element={<UserDashboard />} />
+        <Route
+          path="/dashboard/user/:id"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element />
       </Routes>
     </>

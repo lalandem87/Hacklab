@@ -2,12 +2,21 @@ import type { JSX } from "react/jsx-runtime";
 import { NavLink } from "react-router";
 import { Tornado } from "lucide-react";
 import "./Module.scss";
+import { useAuth } from "../../context/AuthContext";
+import { useFetchWithToken } from "../../utilities/useFetchWithToken";
 
 interface ModuleCardProps {
   modules: any[];
 }
 
 export function ModuleCard({ modules }: ModuleCardProps): JSX.Element {
+  const { token } = useAuth();
+  const { data: me } = useFetchWithToken("user/me", "GET", token);
+  const isModuleAlreadyStarted = (mod: any) => {
+    return me?.userModules?.find(
+      (usrModule: any) => usrModule.module?.id === mod.id,
+    );
+  };
   return (
     <div className="catalogue-module-container">
       {modules.map((mod) => {
@@ -28,7 +37,9 @@ export function ModuleCard({ modules }: ModuleCardProps): JSX.Element {
             </div>
             <div className="module-card-bottom">
               <p className="desc">{mod.description}</p>
-              <NavLink to={`/module/${mod.id}`}>Commencer</NavLink>
+              <NavLink to={`/module/${mod.id}`}>
+                {isModuleAlreadyStarted(mod) ? "Continuer" : "Démarrer"}
+              </NavLink>
             </div>
           </div>
         );

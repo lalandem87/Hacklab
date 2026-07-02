@@ -16,7 +16,7 @@ class Task
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['course:read', 'module:read'])]
+    #[Groups(['course:read', 'module:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 20)]
@@ -217,27 +217,5 @@ class Task
     public function getUserTaskQuestions(): Collection
     {
         return $this->userTaskQuestions;
-    }
-
-    public function addUserTaskQuestion(UserTaskQuestion $userTaskQuestion): static
-    {
-        if (!$this->userTaskQuestions->contains($userTaskQuestion)) {
-            $this->userTaskQuestions->add($userTaskQuestion);
-            $userTaskQuestion->setTask($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserTaskQuestion(UserTaskQuestion $userTaskQuestion): static
-    {
-        if ($this->userTaskQuestions->removeElement($userTaskQuestion)) {
-            // set the owning side to null (unless already changed)
-            if ($userTaskQuestion->getTask() === $this) {
-                $userTaskQuestion->setTask(null);
-            }
-        }
-
-        return $this;
     }
 }

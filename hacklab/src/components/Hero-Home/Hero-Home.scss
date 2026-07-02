@@ -15,10 +15,10 @@
     gap: var(--spacing-lg);
 
     .section-badge {
-      width: fit-content;
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      margin: 0 auto;
       padding: 6px 16px;
       border: 1px solid var(--primary);
       border-radius: 999px;
@@ -37,6 +37,8 @@
 
     h1 {
       font-size: var(--font-size-xxl);
+      max-width: 760px;
+      margin: 0 auto;
 
       em {
         color: var(--primary);
